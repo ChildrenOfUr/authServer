@@ -8,7 +8,7 @@ import 'dart:math';
 import "package:http/http.dart" as http;
 import "package:redstone/server.dart" as app;
 
-part "../KEYS.dart";
+part "../API_KEYS.dart";
 part "auth.dart";
 
 void main()
