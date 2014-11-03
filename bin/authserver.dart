@@ -13,7 +13,6 @@ part "auth.dart";
 
 void main()
 {
-	//test codeship
 	int port = 8383;
 	try	{port = int.parse(Platform.environment['AUTH_PORT']);}
 	catch (error){port = 8383;}
