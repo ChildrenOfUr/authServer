@@ -1,0 +1,8 @@
+name: authServer
+version: 0.0.1
+description: A server to handle logins for the CoU Client
+author: CoU Development Team
+
+dependencies:
+  redstone: any
+  http: any
