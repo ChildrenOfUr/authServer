@@ -21,9 +21,17 @@ class AuthService
 			Map responseMap = JSON.decode(response.body);
 			print('responseMap: $responseMap');
 			if(responseMap['status'] == 'okay')
-				c.complete({'ok':'yes',
-							'playerName':'testUser ${rand.nextInt(1000000)}',
-							'playerStreet':'LA58KK7B9O522PC'});
+			{
+				createSession(responseMap['email']).then((String sessionKey)
+				{
+					c.complete({'ok':'yes',
+    							'slack-team':slackTeam,
+    							'slack-token':bugToken,
+    							'sessionToken':sessionKey,
+    							'playerName':SESSIONS[sessionKey].username,
+    							'playerStreet':'LA58KK7B9O522PC'});
+				});
+			}
 			else
 				c.complete({'ok':'no'});
 		});
@@ -34,9 +42,25 @@ class AuthService
 	@app.Route('/logout', methods: const[app.POST])
     Map logoutUser(@app.Body(app.JSON) Map parameters)
     {
-		//does nothing at the moment
-		//should remove any session key associated with parameters['session-key']
-
+		//should remove any session key associated with parameters['sessionToken']
+		SESSIONS.remove([parameters['sessionToken']]);
 		return {'ok':'yes'};
     }
+
+	//creates an entry in the SESSIONS map and returns the username associated with the session
+	Future<String> createSession(String email)
+	{
+		Completer c = new Completer();
+		http.post('http://childrenofur.com/getUsername.php',body:{'email':email}).then((response)
+		{
+			String username = response.body;
+			String sessionKey = uuid.v1();
+			Session session = new Session(sessionKey, username, email);
+
+			SESSIONS[sessionKey] = session;
+			c.complete(sessionKey);
+		});
+
+		return c.future;
+	}
 }

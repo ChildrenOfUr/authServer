@@ -8,9 +8,15 @@ import 'dart:math';
 import "package:http/http.dart" as http;
 import "package:redstone/server.dart" as app;
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:uuid/uuid.dart';
 
 part "../API_KEYS.dart";
 part "auth.dart";
+part "data.dart";
+part 'session.dart';
+
+Map<String,Session> SESSIONS = {};
+Uuid uuid = new Uuid();
 
 void main()
 {

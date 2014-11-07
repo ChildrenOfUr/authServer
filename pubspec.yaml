@@ -6,3 +6,4 @@ author: CoU Development Team
 dependencies:
   redstone: any
   http: any
+  uuid: any

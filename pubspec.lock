@@ -13,10 +13,18 @@ packages:
     description: barback
     source: hosted
     version: "0.15.2+2"
+  bignum:
+    description: bignum
+    source: hosted
+    version: "0.0.6"
   browser:
     description: browser
     source: hosted
     version: "0.10.0+2"
+  cipher:
+    description: cipher
+    source: hosted
+    version: "0.7.1"
   code_transformers:
     description: code_transformers
     source: hosted
@@ -37,6 +45,10 @@ packages:
     description: di
     source: hosted
     version: "3.3.2"
+  fixnum:
+    description: fixnum
+    source: hosted
+    version: "0.9.0"
   grinder:
     description: grinder
     source: hosted
@@ -97,6 +109,10 @@ packages:
     description: string_scanner
     source: hosted
     version: "0.1.1"
+  uuid:
+    description: uuid
+    source: hosted
+    version: "0.4.1"
   watcher:
     description: watcher
     source: hosted
