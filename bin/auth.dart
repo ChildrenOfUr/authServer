@@ -27,6 +27,7 @@ class AuthService
 					c.complete({'ok':'yes',
     							'slack-team':slackTeam,
     							'slack-token':bugToken,
+    							'sc-token':scToken,
     							'sessionToken':sessionKey,
     							'playerName':SESSIONS[sessionKey].username,
     							'playerStreet':'LA58KK7B9O522PC'});
