@@ -9,9 +9,12 @@ class AuthService
 		Random rand = new Random();
     	Completer c = new Completer();
 
+    	//TODO: this must be changed to not allow the client to dictate what the audience is
+    	//according to the persona docs. However, for testing purposes,
+    	//this is a necessary evil.
     	String audience = 'http://play.childrenofur.com:80';
-    	if(parameters['testing'] != null)
-    		audience = 'http://localhost:8080';
+    	if(parameters['audience'] != null)
+    		audience = parameters['audience'];//'http://localhost:8080';
 
     	Map body = {'assertion':parameters['assertion'],
     				'audience':audience};
