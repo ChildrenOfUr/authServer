@@ -13,8 +13,10 @@ class AuthService
     	//according to the persona docs. However, for testing purposes,
     	//this is a necessary evil.
     	String audience = 'http://play.childrenofur.com:80';
+    	if(parameters['testing'] != null)
+    		audience = 'http://localhost:8080';
     	if(parameters['audience'] != null)
-    		audience = parameters['audience'];//'http://localhost:8080';
+    		audience = parameters['audience'];
 
     	Map body = {'assertion':parameters['assertion'],
     				'audience':audience};
