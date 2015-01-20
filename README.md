@@ -1,6 +1,6 @@
 authServer
 ==========
 
-The login/authentication server for CoU
+The login/authentication server for CoU.
 
-This was split off from the main CoU server for reasons of stability and seperation of tasks.
+This was split off from the main CoU server for reasons of stability and separation of tasks.
