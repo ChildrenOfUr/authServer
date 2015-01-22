@@ -46,9 +46,12 @@ void main(List<String> arguments)
 	
 	if (loadCert)
 	{
-	  SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
-	  app.setupConsoleLog();
-	  app.start(port:port, autoCompress:true, secureOptions: {#certificateName: "robertmcdermot.com"});
+	  try
+	  {
+	    SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
+	    app.setupConsoleLog();
+	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: "robertmcdermot.com"});
+	  } catch (error) {print("Unable to start server with signed certificate.");}
 	}
 	else
 	{
