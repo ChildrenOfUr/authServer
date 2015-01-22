@@ -23,7 +23,9 @@ folder. Directions can be found in the developer docs
 You will need to change the line at the top of the file from `part of couServer;` to `part of authServer;`.
 2. After that, right-click on the `bin/authserver.dart` file and select Run to start the server on your
 local machine. 
-3. Go to http://localhost:8383 to test that your server is returning data. See `server.dart`
+3. If you do not have a signed cert and cert password, you will have to supply the option
+`--no-load-cert` on the command line or in the Dart Editor run configuration.
+4. Go to `http://localhost:8383/serverStatus` to test that your server is returning data. See `server.dart`
 for other routes.
 
 [ ![Codeship Status for ChildrenOfUr/authServer](https://codeship.com/projects/92b72790-459b-0132-ec31-26eabbfbacd1/status?branch=master)](https://codeship.com/projects/45064)

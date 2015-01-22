@@ -19,6 +19,7 @@ part 'session.dart';
 Map<String,Session> SESSIONS = {};
 Uuid uuid = new Uuid();
 ArgResults argResults;
+bool loadCert;
 
 void main(List<String> arguments)
 {
@@ -29,7 +30,7 @@ void main(List<String> arguments)
     ..addOption("port", defaultsTo:"8383", help: "Port to run the server on");
   
   argResults = parser.parse(arguments);
-  bool loadCert = argResults['load-cert'];
+  loadCert = argResults['load-cert'];
   
 	int port;
 	try	{port = int.parse(argResults['port']);}
@@ -75,4 +76,21 @@ crossOriginInterceptor()
 	}
 }
 
+@app.Route('/serverStatus')
+Map getServerStatus()
+{
+  Map statusMap = {};
+  try
+  {
+    statusMap['status'] = "OK";
+    statusMap['loadCert'] = loadCert;
+  }
+  catch(e){logMessage("Error getting server status: $e");}
+  return statusMap;
+}
+
+void logMessage(String message)
+{
+  print("(${new DateTime.now().toString()}) $message");
+}
 _createCorsHeader() => {"Access-Control-Allow-Origin": "*","Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"};
