@@ -7,3 +7,4 @@ dependencies:
   redstone: any
   http: any
   uuid: any
+  args: any
