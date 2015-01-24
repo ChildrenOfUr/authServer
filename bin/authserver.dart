@@ -19,7 +19,7 @@ part 'session.dart';
 Map<String,Session> SESSIONS = {};
 Uuid uuid = new Uuid();
 ArgResults argResults;
-bool loadCert;
+bool loadCert = true;
 
 void main(List<String> arguments)
 {

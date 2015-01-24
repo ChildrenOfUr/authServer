@@ -8,3 +8,5 @@ dependencies:
   http: any
   uuid: any
   args: any
+dev_dependencies:
+  unittest: any
