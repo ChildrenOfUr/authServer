@@ -12,9 +12,9 @@ import 'package:shelf/shelf.dart' as shelf;
 import 'package:uuid/uuid.dart';
 import "package:authServer/session.dart";
 
-part "../API_KEYS.dart";
-part "../lib/auth.dart";
-part "../lib/data.dart";
+part '../API_KEYS.dart';
+part '../lib/auth.dart';
+part '../lib/data.dart';
 
 
 Map<String,Session> SESSIONS = {};

@@ -5,7 +5,7 @@ import 'package:unittest/unittest.dart';
 import 'package:redstone/server.dart' as app;
 import 'package:redstone/mocks.dart';
 
-import '../bin/authServer.dart';
+import '../bin/authserver.dart';
 
 main() {
 

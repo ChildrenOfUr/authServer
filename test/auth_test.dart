@@ -5,7 +5,7 @@ import 'package:unittest/unittest.dart';
 import 'package:redstone/server.dart' as app;
 import 'package:redstone/mocks.dart';
 
-import '../bin/authServer.dart';
+import '../bin/authserver.dart';
 
 main() {
 
@@ -17,8 +17,8 @@ main() {
 
   test("POST login error", () {
     //create a mock request
-    var req = new MockRequest("/auth/login", 
-        method: app.POST, 
+    var req = new MockRequest("/auth/login",
+        method: app.POST,
         bodyType: app.JSON, body: {
       "testing": "true",
       "assertion": "mixolyde@gmail.com"
@@ -31,11 +31,11 @@ main() {
       expect(content, containsPair("ok", "no"));
     });
   });
-  
+
   test("POST logout session", () {
     //create a mock request
-    var req = new MockRequest("/auth/logout", 
-        method: app.POST, 
+    var req = new MockRequest("/auth/logout",
+        method: app.POST,
         bodyType: app.JSON, body: {
       "session": "Test token"
     });
