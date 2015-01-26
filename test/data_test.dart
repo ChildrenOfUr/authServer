@@ -6,7 +6,7 @@ import 'package:redstone/server.dart' as app;
 import 'package:redstone/mocks.dart';
 import "package:authServer/session.dart";
 
-import "../bin/authServer.dart" as server;
+import "../bin/authserver.dart" as server;
 
 
 main() {
