@@ -19,8 +19,8 @@ main() {
 
   test("POST street, not logged in", () {
     //create a mock request
-    var req = new MockRequest("/data/street", 
-        method: app.POST, 
+    var req = new MockRequest("/data/street",
+        method: app.POST,
         bodyType: app.JSON, body: {
       "sessionToken": "value1",
       "street": "LA58KK7B9O522PC"
@@ -39,10 +39,10 @@ main() {
     String sessionKey = server.uuid.v1();
     Session session = new Session(sessionKey, "testuser", "testemail@whatever.com");
     server.SESSIONS[sessionKey] = session;
-    
+
     //create a mock request
-    var req = new MockRequest("/data/street", 
-        method: app.POST, 
+    var req = new MockRequest("/data/street",
+        method: app.POST,
         bodyType: app.JSON, body: {
       "sessionToken": "$sessionKey",
       "street": "LA58KK7B9O522PC"
