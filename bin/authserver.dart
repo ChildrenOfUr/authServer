@@ -10,11 +10,12 @@ import "package:http/http.dart" as http;
 import "package:redstone/server.dart" as app;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:uuid/uuid.dart';
+import "package:authServer/session.dart";
 
 part "../API_KEYS.dart";
-part "auth.dart";
-part "data.dart";
-part 'session.dart';
+part "../lib/auth.dart";
+part "../lib/data.dart";
+
 
 Map<String,Session> SESSIONS = {};
 Uuid uuid = new Uuid();

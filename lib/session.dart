@@ -1,4 +1,4 @@
-part of authServer;
+library session;
 
 class Session
 {

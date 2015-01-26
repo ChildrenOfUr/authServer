@@ -1,3 +1,5 @@
+library authServer_test;
+
 import 'dart:convert';
 import 'package:unittest/unittest.dart';
 import 'package:redstone/server.dart' as app;

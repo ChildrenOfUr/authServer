@@ -29,6 +29,7 @@ class AuthService
 			{
 				createSession(responseMap['email']).then((String sessionKey)
 				{
+				  //TODO remove default player street
 					c.complete({'ok':'yes',
     							'slack-team':slackTeam,
     							'slack-token':bugToken,
