@@ -28,4 +28,8 @@ local machine.
 4. Go to `http://localhost:8383/serverStatus` to test that your server is returning data. See `server.dart`
 for other routes.
 
+##Testing##
+1. To run the tests, you can either type `dart test/all_tests.dart` from the command line,
+or right-click on `test/all_tests.dart` and select 'Run.'
+
 [ ![Codeship Status for ChildrenOfUr/authServer](https://codeship.com/projects/92b72790-459b-0132-ec31-26eabbfbacd1/status?branch=master)](https://codeship.com/projects/45064)
