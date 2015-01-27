@@ -4,3 +4,4 @@ API_KEYS.dart
 packages/
 pubspec.lock
 build
+*.swp
