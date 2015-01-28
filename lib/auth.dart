@@ -21,6 +21,7 @@ class AuthService
     	Map body = {'assertion':parameters['assertion'],
     				'audience':audience};
 
+    	//TODO find a way to mock this call for testing
     	http.post('https://verifier.login.persona.org/verify',body:body).then((response)
 		{
 			Map responseMap = JSON.decode(response.body);
