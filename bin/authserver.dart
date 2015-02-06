@@ -29,14 +29,14 @@ void main(List<String> arguments)
   //use --no-load-cert to ignore certification loading
     ..addFlag("load-cert", defaultsTo: true, help: "Enables certificate loading for certificate")
     ..addOption("port", defaultsTo:"8383", help: "Port to run the server on");
-  
+
   argResults = parser.parse(arguments);
   loadCert = argResults['load-cert'];
-  
+
 	int port;
 	try	{port = int.parse(argResults['port']);}
 	catch(error){port = 8383;}
-	
+
 	//try to parse ENV var
 	if (Platform.environment['AUTH_PORT'] != null &&
 	    Platform.environment['AUTH_PORT'].isNotEmpty)
@@ -44,23 +44,23 @@ void main(List<String> arguments)
 	  try {port = int.parse(Platform.environment['AUTH_PORT']);}
 	  catch (error){port = 8383;}
 	}
-	
+
 	if (loadCert)
 	{
 	  try
 	  {
 	    SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
 	    app.setupConsoleLog();
-	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: "robertmcdermot.com"});
+	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: "childrenofurCert"});
 	  } catch (error) {print("Unable to start server with signed certificate.");}
 	}
 	else
 	{
 	  //start up server in non-cert-certified developer mode
 	  app.setupConsoleLog();
-	  app.start(port:port);  
+	  app.start(port:port);
 	}
-	
+
 }
 
 //add a CORS header to every request
