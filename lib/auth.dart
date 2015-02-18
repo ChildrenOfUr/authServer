@@ -36,6 +36,7 @@ class AuthService
     							'sc-token':scToken,
     							'sessionToken':sessionKey,
     							'playerName':SESSIONS[sessionKey].username,
+    							'playerEmail':responseMap['email'],
     							'playerStreet':'LA58KK7B9O522PC'});
 				});
 			}
