@@ -62,15 +62,15 @@ class AuthService
 
 		try
 		{
-			String url = 'http://server.childrenofur.com/forums/addUser?api_key=$apiKey';
-			url += '&username='+parameters['username'];
-			url += '&email='+SESSIONS[parameters['token']].email;
-			url += '&bio=';
-
-			http.get(url).then((response)
+			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
+            Map params = {
+                          'username':parameters['username'],
+                          'email':SESSIONS[parameters['token']].email,
+                          'bio':''
+                         };
+			dbConn.execute(query,params).then((int userId)
 			{
-				Map responseMap = JSON.decode(response.body);
-				if(responseMap['result'] == 'OK')
+				if(userId != 0)
 				{
 					c.complete({'ok':'yes'});
 				}
