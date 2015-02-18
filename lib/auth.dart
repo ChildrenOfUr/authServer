@@ -56,7 +56,7 @@ class AuthService
     }
 
 	@app.Route('/setusername', methods: const[app.POST])
-	Future<Map> setUsername(@app.Body(app.FORM) Map parameters)
+	Future<Map> setUsername(@app.Body(app.JSON) Map parameters)
 	{
 		Completer c = new Completer();
 
