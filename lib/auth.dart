@@ -37,7 +37,8 @@ class AuthService
     							'playerName':SESSIONS[sessionKey].username,
     							'playerEmail':responseMap['email'],
     							'playerStreet':'LA58KK7B9O522PC'});
-				});
+				},
+				onError:((_) => c.complete({'ok':'no'})));
 			}
 			else
 				c.complete({'ok':'no'});
@@ -82,19 +83,27 @@ class AuthService
 		return c.future;
 	}
 
+	PostgreSql get dbConn => app.request.attributes.dbConn;
+
 	//creates an entry in the SESSIONS map and returns the username associated with the session
 	Future<String> createSession(String email)
 	{
 		Completer c = new Completer();
-		http.get('http://server.childrenofur.com/forums/getUser?api_key=$apiKey&email=$email').then((response)
-		{
-			Map r = JSON.decode(response.body);
-			String username = r['data']['username'];
-			String sessionKey = uuid.v1();
-			Session session = new Session(sessionKey, username, email);
+		String query = "SELECT * FROM users WHERE email = @email";
+		Map params = {'email':email};
 
-			SESSIONS[sessionKey] = session;
-			c.complete(sessionKey);
+		dbConn.query(query, User, params).then((List<User> users)
+		{
+			if(users.length > 0)
+			{
+    			String sessionKey = uuid.v1();
+    			Session session = new Session(sessionKey, users[0].username, email);
+
+    			SESSIONS[sessionKey] = session;
+    			c.complete(sessionKey);
+			}
+			else
+				c.completeError('error');
 		});
 
 		return c.future;

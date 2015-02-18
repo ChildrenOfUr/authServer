@@ -8,6 +8,9 @@ import 'dart:math';
 import "package:args/args.dart";
 import "package:http/http.dart" as http;
 import "package:redstone/server.dart" as app;
+import 'package:redstone_mapper/plugin.dart';
+import 'package:redstone_mapper/mapper.dart';
+import 'package:redstone_mapper_pg/manager.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:uuid/uuid.dart';
 import "package:authServer/session.dart";
@@ -15,12 +18,13 @@ import "package:authServer/session.dart";
 part '../API_KEYS.dart';
 part '../lib/auth.dart';
 part '../lib/data.dart';
-
+part '../lib/user.dart';
 
 Map<String,Session> SESSIONS = {};
 Uuid uuid = new Uuid();
 ArgResults argResults;
 bool loadCert = true;
+PostgreSqlManager dbManager;
 
 void main(List<String> arguments)
 {
@@ -49,6 +53,9 @@ void main(List<String> arguments)
 	{
 	  try
 	  {
+		dbManager = new PostgreSqlManager(databaseUri, min: 1, max: 9);
+		app.addPlugin(getMapperPlugin(dbManager));
+
 	    SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
 	    app.setupConsoleLog();
 	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: "childrenofurCert"});

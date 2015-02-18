@@ -5,6 +5,7 @@ author: CoU Development Team
 
 dependencies:
   redstone: any
+  redstone_mapper_pg: any
   http: any
   uuid: any
   args: any
