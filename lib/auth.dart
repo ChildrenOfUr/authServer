@@ -103,7 +103,7 @@ class AuthService
     			c.complete(sessionKey);
 			}
 			else
-				c.completeError('error');
+				c.complete('');
 		});
 
 		return c.future;
