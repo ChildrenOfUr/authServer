@@ -86,7 +86,7 @@ class AuthService
 	Future<String> createSession(String email)
 	{
 		Completer c = new Completer();
-		http.post('http://server.childrenofur.com/forums/getUser?api_key=$apiKey&email=$email').then((response)
+		http.get('http://server.childrenofur.com/forums/getUser?api_key=$apiKey&email=$email').then((response)
 		{
 			Map r = JSON.decode(response.body);
 			String username = r['data']['username'];
