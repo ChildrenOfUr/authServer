@@ -92,18 +92,21 @@ class AuthService
 		String query = "SELECT * FROM users WHERE email = @email";
 		Map params = {'email':email};
 
+		String sessionKey = uuid.v1();
+
 		dbConn.query(query, User, params).then((List<User> users)
 		{
+			Session session;
+
 			if(users.length > 0)
 			{
-    			String sessionKey = uuid.v1();
-    			Session session = new Session(sessionKey, users[0].username, email);
-
-    			SESSIONS[sessionKey] = session;
-    			c.complete(sessionKey);
+    			session = new Session(sessionKey, users[0].username, email);
 			}
 			else
-				c.complete('');
+				session = new Session(sessionKey, '', email);
+
+			SESSIONS[sessionKey] = session;
+			c.complete(sessionKey);
 		});
 
 		return c.future;
