@@ -24,7 +24,6 @@ class AuthService
     	http.post('https://verifier.login.persona.org/verify',body:body).then((response)
 		{
 			Map responseMap = JSON.decode(response.body);
-			print('responseMap: $responseMap');
 			if(responseMap['status'] == 'okay')
 			{
 				createSession(responseMap['email']).then((String sessionKey)
@@ -54,44 +53,43 @@ class AuthService
 		SESSIONS.remove([parameters['sessionToken']]);
 		return {'ok':'yes'};
     }
-	
-	 @app.Route('/setusername', methods: const[app.POST])
-     Future<Map> setUsername(@app.Body(app.JSON) Map parameters)
-     {
-       Completer c = new Completer();
 
-       Map body = 
-         {
-         'api_key': forumKey,
-         'username': parameters['username'],
-         'email': SESSIONS[parameters['token']],
-         'bio': ''                   
-         };
+	@app.Route('/setusername', methods: const[app.POST])
+	Future<Map> setUsername(@app.Body(app.FORM) Map parameters)
+	{
+		Completer c = new Completer();
 
-       http.post(
-           'http://server.childrenofur.com/forums/addUser/',body:body)
-           .then((response)
-     {
-       Map responseMap = JSON.decode(response.body);
-       print('responseMap: $responseMap');
-       if(responseMap['result'] == 'OK')
-       {
-         c.complete({'ok':'yes'});
-       }
-       else
-         c.complete({'ok':'no'});
-     });
-       return c.future;
-     }
-	
+		try
+		{
+			String url = 'http://server.childrenofur.com/forums/addUser?api_key=$apiKey';
+			url += '&username='+parameters['username'];
+			url += '&email='+SESSIONS[parameters['token']].email;
+			url += '&bio=';
+
+			http.get(url).then((response)
+			{
+				Map responseMap = JSON.decode(response.body);
+				if(responseMap['result'] == 'OK')
+				{
+					c.complete({'ok':'yes'});
+				}
+				else
+					c.complete({'ok':'no'});
+			});
+		}
+		catch(e){c.completeError({'ok':'no'});}
+
+		return c.future;
+	}
 
 	//creates an entry in the SESSIONS map and returns the username associated with the session
 	Future<String> createSession(String email)
 	{
 		Completer c = new Completer();
-		http.post('http://childrenofur.com/getUsername.php',body:{'email':email}).then((response)
+		http.post('http://server.childrenofur.com/getUser?api_key=$apiKey&email=$email').then((response)
 		{
-			String username = response.body;
+			Map r = JSON.decode(response.body);
+			String username = r['data']['username'];
 			String sessionKey = uuid.v1();
 			Session session = new Session(sessionKey, username, email);
 
