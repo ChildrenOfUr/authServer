@@ -54,6 +54,36 @@ class AuthService
 		SESSIONS.remove([parameters['sessionToken']]);
 		return {'ok':'yes'};
     }
+	
+	 @app.Route('/setusername', methods: const[app.POST])
+     Future<Map> setUsername(@app.Body(app.JSON) Map parameters)
+     {
+       Completer c = new Completer();
+
+       Map body = 
+         {
+         'api_key': forumKey,
+         'username': parameters['username'],
+         'email': SESSIONS[parameters['token']],
+         'bio': ''                   
+         };
+
+       http.post(
+           'http://server.childrenofur.com/forums/addUser/',body:body)
+           .then((response)
+     {
+       Map responseMap = JSON.decode(response.body);
+       print('responseMap: $responseMap');
+       if(responseMap['result'] == 'OK')
+       {
+         c.complete({'ok':'yes'});
+       }
+       else
+         c.complete({'ok':'no'});
+     });
+       return c.future;
+     }
+	
 
 	//creates an entry in the SESSIONS map and returns the username associated with the session
 	Future<String> createSession(String email)
