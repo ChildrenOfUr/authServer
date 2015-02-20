@@ -28,15 +28,20 @@ class AuthService
 			{
 				createSession(responseMap['email']).then((String sessionKey)
 				{
-				  //TODO remove default player street
-					c.complete({'ok':'yes',
-    							'slack-team':slackTeam,
-    							'slack-token':bugToken,
-    							'sc-token':scToken,
-    							'sessionToken':sessionKey,
-    							'playerName':SESSIONS[sessionKey].username,
-    							'playerEmail':responseMap['email'],
-    							'playerStreet':'LA58KK7B9O522PC'});
+					//TODO remove default player street
+					http.get('http://localhost:8181/getMetabolics?username=${SESSIONS[sessionKey].username}').then((response)
+					{
+						Map metabolics = JSON.decode(response.body);
+						c.complete({'ok':'yes',
+        							'slack-team':slackTeam,
+        							'slack-token':bugToken,
+        							'sc-token':scToken,
+        							'sessionToken':sessionKey,
+        							'playerName':SESSIONS[sessionKey].username,
+        							'playerEmail':responseMap['email'],
+        							'playerStreet':metabolics['current_street'],
+        							'metabolics':metabolics});
+					});
 				},
 				onError:((_) => c.complete({'ok':'no'})));
 			}
