@@ -56,9 +56,9 @@ void main(List<String> arguments)
 		dbManager = new PostgreSqlManager(databaseUri, min: 1, max: 9);
 		app.addPlugin(getMapperPlugin(dbManager));
 
-	    //SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
+	    SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
 	    app.setupConsoleLog();
-	    app.start(port:port, autoCompress:true);//, secureOptions: {#certificateName: "childrenofurCert"});
+	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: "childrenofurCert"});
 	  } catch (error) {print("Unable to start server with signed certificate.");}
 	}
 	else
