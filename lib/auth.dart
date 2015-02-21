@@ -4,14 +4,12 @@ part of authServer;
 class AuthService
 {
 	@app.Route('/login', methods: const[app.POST])
-    Future<Map> loginUser(@app.Body(app.JSON) Map parameters)
+    Future<Map> loginUser(@app.Body(app.JSON) Map parameters) async
     {
 		Random rand = new Random();
-    	Completer c = new Completer();
 
     	//TODO: this must be changed to not allow the client to dictate what the audience is
-    	//according to the persona docs. However, for testing purposes,
-    	//this is a necessary evil.
+    	//according to the persona docs. However, for testing purposes, this is a necessary evil.
     	String audience = 'http://play.childrenofur.com:80';
     	if(parameters['testing'] != null)
     		audience = 'http://localhost:8080';
@@ -21,35 +19,32 @@ class AuthService
     	Map body = {'assertion':parameters['assertion'],
     				'audience':audience};
 
-    	http.post('https://verifier.login.persona.org/verify',body:body).then((response)
-		{
-			Map responseMap = JSON.decode(response.body);
-			if(responseMap['status'] == 'okay')
-			{
-				createSession(responseMap['email']).then((String sessionKey)
-				{
-					//TODO remove default player street
-					http.get('http://localhost:8181/getMetabolics?username=${SESSIONS[sessionKey].username}').then((response)
-					{
-						Map metabolics = JSON.decode(response.body);
-						c.complete({'ok':'yes',
-        							'slack-team':slackTeam,
-        							'slack-token':bugToken,
-        							'sc-token':scToken,
-        							'sessionToken':sessionKey,
-        							'playerName':SESSIONS[sessionKey].username,
-        							'playerEmail':responseMap['email'],
-        							'playerStreet':metabolics['current_street'],
-        							'metabolics':metabolics});
-					});
-				},
-				onError:((_) => c.complete({'ok':'no'})));
-			}
-			else
-				c.complete({'ok':'no'});
-		});
+    	http.Response response = await http.post('https://verifier.login.persona.org/verify',body:body);
+		Map responseMap = JSON.decode(response.body);
 
-    	return c.future;
+		if(responseMap['status'] == 'okay')
+		{
+			try
+			{
+				String sessionKey = await createSession(responseMap['email']);
+				//TODO remove default player street
+				String metabolicsUrl = 'http://localhost:8181/getMetabolics?username=${SESSIONS[sessionKey].username}';
+				http.Response response = await http.get(metabolicsUrl);
+				Map metabolics = JSON.decode(response.body);
+				return {'ok':'yes',
+						'slack-team':slackTeam,
+						'slack-token':bugToken,
+						'sc-token':scToken,
+						'sessionToken':sessionKey,
+						'playerName':SESSIONS[sessionKey].username,
+						'playerEmail':responseMap['email'],
+						'playerStreet':metabolics['current_street'],
+						'metabolics':metabolics};
+			}
+			catch(e){return {'ok':'no'};}
+		}
+		else
+			return {'ok':'no'};
     }
 
 	@app.Route('/logout', methods: const[app.POST])
@@ -61,10 +56,8 @@ class AuthService
     }
 
 	@app.Route('/setusername', methods: const[app.POST])
-	Future<Map> setUsername(@app.Body(app.JSON) Map parameters)
+	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
-		Completer c = new Completer();
-
 		try
 		{
 			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
@@ -73,47 +66,35 @@ class AuthService
                           'email':SESSIONS[parameters['token']].email,
                           'bio':''
                          };
-			dbConn.execute(query,params).then((int userId)
-			{
-				if(userId != 0)
-				{
-					c.complete({'ok':'yes'});
-				}
-				else
-					c.complete({'ok':'no'});
-			});
-		}
-		catch(e){c.completeError({'ok':'no'});}
+			int userId = await dbConn.execute(query,params);
 
-		return c.future;
+			if(userId != 0)
+				return {'ok':'yes'};
+			else
+				return {'ok':'no'};
+		}
+		catch(e){return {'ok':'no'};}
 	}
 
 	PostgreSql get dbConn => app.request.attributes.dbConn;
 
 	//creates an entry in the SESSIONS map and returns the username associated with the session
-	Future<String> createSession(String email)
+	Future<String> createSession(String email) async
 	{
-		Completer c = new Completer();
 		String query = "SELECT * FROM users WHERE email = @email";
 		Map params = {'email':email};
 
 		String sessionKey = uuid.v1();
 
-		dbConn.query(query, User, params).then((List<User> users)
-		{
-			Session session;
+		List<User> users = await dbConn.query(query, User, params);
+		Session session;
 
-			if(users.length > 0)
-			{
-    			session = new Session(sessionKey, users[0].username, email);
-			}
-			else
-				session = new Session(sessionKey, '', email);
+		if(users.length > 0)
+			session = new Session(sessionKey, users[0].username, email);
+		else
+			session = new Session(sessionKey, '', email);
 
-			SESSIONS[sessionKey] = session;
-			c.complete(sessionKey);
-		});
-
-		return c.future;
+		SESSIONS[sessionKey] = session;
+		return sessionKey;
 	}
 }
