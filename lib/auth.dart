@@ -27,21 +27,21 @@ class AuthService
 			try
 			{
 				String sessionKey = await createSession(responseMap['email']);
-				//TODO remove default player street
-				String metabolicsUrl = 'http://localhost:8181/getMetabolics?username=${SESSIONS[sessionKey].username}';
-				http.Response response = await http.get(metabolicsUrl);
-				Map metabolics = JSON.decode(response.body);
-				return {'ok':'yes',
+				String query = "SELECT * FROM metabolics AS m JOIN users AS u ON m.user_id = u.id WHERE u.username = @username";
+				List<Metabolics> m = await dbConn.query(query, Metabolics, {'username':SESSIONS[sessionKey].username});
+				Map response =  {'ok':'yes',
 						'slack-team':slackTeam,
 						'slack-token':bugToken,
 						'sc-token':scToken,
 						'sessionToken':sessionKey,
 						'playerName':SESSIONS[sessionKey].username,
 						'playerEmail':responseMap['email'],
-						'playerStreet':metabolics['current_street'],
-						'metabolics':metabolics};
+						'playerStreet':m[0].current_street,
+						'metabolics':JSON.encode(encode(m[0]))};
+
+				return response;
 			}
-			catch(e){return {'ok':'no'};}
+			catch(e){print(e);return {'ok':'no'};}
 		}
 		else
 			return {'ok':'no'};

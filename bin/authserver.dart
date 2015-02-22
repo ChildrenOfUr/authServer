@@ -19,6 +19,7 @@ part '../API_KEYS.dart';
 part '../lib/auth.dart';
 part '../lib/data.dart';
 part '../lib/user.dart';
+part '../lib/metabolics.dart';
 
 Map<String,Session> SESSIONS = {};
 Uuid uuid = new Uuid();
