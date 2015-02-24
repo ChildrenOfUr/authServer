@@ -29,6 +29,9 @@ class AuthService
 				String sessionKey = await createSession(responseMap['email']);
 				String query = "SELECT * FROM metabolics AS m JOIN users AS u ON m.user_id = u.id WHERE u.username = @username";
 				List<Metabolics> m = await dbConn.query(query, Metabolics, {'username':SESSIONS[sessionKey].username});
+				Metabolics playerMetabolics = new Metabolics();
+				if(m.length > 0)
+					playerMetabolics = m[0];
 				Map response =  {'ok':'yes',
 						'slack-team':slackTeam,
 						'slack-token':bugToken,
@@ -36,8 +39,8 @@ class AuthService
 						'sessionToken':sessionKey,
 						'playerName':SESSIONS[sessionKey].username,
 						'playerEmail':responseMap['email'],
-						'playerStreet':m[0].current_street,
-						'metabolics':JSON.encode(encode(m[0]))};
+						'playerStreet':playerMetabolics.current_street,
+						'metabolics':JSON.encode(encode(playerMetabolics))};
 
 				return response;
 			}
