@@ -101,6 +101,27 @@ Map getServerStatus()
   return statusMap;
 }
 
+
+@app.Route('/restartGameServer', methods: const[app.POST])
+Future<String> restartServer(@app.Body(app.JSON) Map params) async
+{
+	String secret = params['secret'];
+	if(secret == restartSecret)
+	{
+		try
+		{
+			ProcessResult result = await Process.run("/bin/sh",["restart_server.sh"]);
+			if(result.exitCode == 0)
+				return "OK";
+			else
+				return "ERROR RESTARTING SERVER";
+		}
+		catch(e){logMessage("Error restarting server: $e"); return "ERROR";}
+	}
+	else
+		return "NOT AUTHORIZED";
+}
+
 void logMessage(String message)
 {
   print("(${new DateTime.now().toString()}) $message");
