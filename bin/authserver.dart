@@ -59,7 +59,7 @@ void main(List<String> arguments)
 
 	    SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
 	    app.setupConsoleLog();
-	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: "childrenofurCert"});
+	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: certName});
 	  } catch (error) {print("Unable to start server with signed certificate.");}
 	}
 	else
