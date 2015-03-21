@@ -15,7 +15,9 @@ import 'package:shelf/shelf.dart' as shelf;
 import 'package:uuid/uuid.dart';
 import "package:authServer/session.dart";
 
-part '../API_KEYS.dart';
+import '../API_KEYS.dart';
+export '../API_KEYS.dart'; //for the test suite
+
 part '../lib/auth.dart';
 part '../lib/data.dart';
 part '../lib/user.dart';
@@ -60,7 +62,7 @@ void main(List<String> arguments)
 	    SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
 	    app.setupConsoleLog();
 	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: certName});
-	  } catch (error) {print("Unable to start server with signed certificate.");}
+	  } catch (error) {print("Unable to start server with signed certificate: $error");}
 	}
 	else
 	{
