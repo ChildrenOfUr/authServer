@@ -66,7 +66,7 @@ class AuthService
 				EmailVerification result = results[0];
 				if(result.token == token)
 				{
-					Map serverdata = getSession({'email':email});
+					Map serverdata = await getSession({'email':email});
 					Map response = {'result':'success','serverdata':serverdata};
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
 
@@ -83,7 +83,7 @@ class AuthService
 	}
 
 	@app.Route('/getSession', methods: const[app.POST])
-	Map getSession(@app.Body(app.JSON) Map parameters) async
+	Future<Map> getSession(@app.Body(app.JSON) Map parameters) async
 	{
 		String email = parameters['email'];
 		String sessionKey = await createSession(email);
@@ -100,6 +100,8 @@ class AuthService
     						'playerEmail':email,
     						'playerStreet':playerMetabolics.current_street,
     						'metabolics':JSON.encode(encode(playerMetabolics))};
+
+		return serverdata;
 	}
 
 	@app.Route('/logout', methods: const[app.POST])
