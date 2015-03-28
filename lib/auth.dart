@@ -66,20 +66,7 @@ class AuthService
 				EmailVerification result = results[0];
 				if(result.token == token)
 				{
-					String sessionKey = await createSession(email);
-    				String query = "SELECT * FROM metabolics AS m JOIN users AS u ON m.user_id = u.id WHERE u.username = @username";
-    				List<Metabolics> m = await dbConn.query(query, Metabolics, {'username':SESSIONS[sessionKey].username});
-    				Metabolics playerMetabolics = new Metabolics();
-    				if(m.length > 0)
-    					playerMetabolics = m[0];
-					Map serverdata =  {'slack-team':slackTeam,
-                						'slack-token':bugToken,
-                						'sc-token':scToken,
-                						'sessionToken':sessionKey,
-                						'playerName':SESSIONS[sessionKey].username,
-                						'playerEmail':email,
-                						'playerStreet':playerMetabolics.current_street,
-                						'metabolics':JSON.encode(encode(playerMetabolics))};
+					Map serverdata = getSession({'email':email});
 					Map response = {'result':'success','serverdata':serverdata};
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
 					return "Email Verified. You may close this window.";
@@ -88,6 +75,26 @@ class AuthService
 		}
 
 		return "Invalid Link";
+	}
+
+	@app.Route('/getSession', methods: const[app.POST])
+	Map getSession(@app.Body(app.JSON) Map parameters) async
+	{
+		String email = parameters['email'];
+		String sessionKey = await createSession(email);
+		String query = "SELECT * FROM metabolics AS m JOIN users AS u ON m.user_id = u.id WHERE u.username = @username";
+		List<Metabolics> m = await dbConn.query(query, Metabolics, {'username':SESSIONS[sessionKey].username});
+		Metabolics playerMetabolics = new Metabolics();
+		if(m.length > 0)
+			playerMetabolics = m[0];
+		Map serverdata =  {'slack-team':slackTeam,
+    						'slack-token':bugToken,
+    						'sc-token':scToken,
+    						'sessionToken':sessionKey,
+    						'playerName':SESSIONS[sessionKey].username,
+    						'playerEmail':email,
+    						'playerStreet':playerMetabolics.current_street,
+    						'metabolics':JSON.encode(encode(playerMetabolics))};
 	}
 
 	@app.Route('/logout', methods: const[app.POST])
