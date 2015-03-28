@@ -8,6 +8,9 @@ class AuthService
 	@app.Route('/verifyEmail', methods: const[app.POST])
 	Future<Map> verifyEmail(@app.Body(app.JSON) Map parameters) async
 	{
+		if(parameters['email'] == null)
+			return {'ok':'no'};
+
 		//create a unique link to click in the email
 		String token = uuid.v1();
 		String link = 'https://$serverUrl:8383/auth/verifyLink?token=$token&email=${parameters['email']}';

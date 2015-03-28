@@ -5,8 +5,6 @@ import 'package:unittest/unittest.dart';
 import 'package:redstone/server.dart' as app;
 import 'package:redstone/mocks.dart';
 
-import '../bin/authserver.dart';
-
 main() {
 
   //load handlers in 'authServer' library
@@ -15,14 +13,11 @@ main() {
   //remove all loaded handlers
   tearDown(() => app.tearDown());
 
-  test("POST login error", () {
+  test("POST verifyEmail error", () {
     //create a mock request
-    var req = new MockRequest("/auth/login",
+    var req = new MockRequest("/auth/verifyEmail",
         method: app.POST,
-        bodyType: app.JSON, body: {
-      "testing": "true",
-      "assertion": "mixolyde@gmail.com"
-    });
+        bodyType: app.JSON, body: {});
     //dispatch the request
     return app.dispatch(req).then((resp) {
       //verify the response
