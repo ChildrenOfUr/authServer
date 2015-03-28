@@ -14,6 +14,7 @@ import 'package:redstone_mapper_pg/manager.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:uuid/uuid.dart';
 import "package:authServer/session.dart";
+import 'package:mailer/mailer.dart';
 
 import '../API_KEYS.dart';
 export '../API_KEYS.dart'; //for the test suite
@@ -22,6 +23,7 @@ part '../lib/auth.dart';
 part '../lib/data.dart';
 part '../lib/user.dart';
 part '../lib/metabolics.dart';
+part '../lib/verify_handler.dart';
 
 Map<String,Session> SESSIONS = {};
 Uuid uuid = new Uuid();
@@ -52,14 +54,14 @@ void main(List<String> arguments)
 	  catch (error){port = 8383;}
 	}
 
+	dbManager = new PostgreSqlManager(databaseUri, min: 1, max: 9);
+	app.addPlugin(getMapperPlugin(dbManager));
+
 	if (loadCert)
 	{
 	  try
 	  {
-		dbManager = new PostgreSqlManager(databaseUri, min: 1, max: 9);
-		app.addPlugin(getMapperPlugin(dbManager));
-
-	    SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
+		SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
 	    app.setupConsoleLog();
 	    app.start(port:port, autoCompress:true, secureOptions: {#certificateName: certName});
 	  } catch (error) {print("Unable to start server with signed certificate: $error");}
@@ -71,6 +73,7 @@ void main(List<String> arguments)
 	  app.start(port:port);
 	}
 
+	VerifyHandler.init();
 }
 
 //add a CORS header to every request

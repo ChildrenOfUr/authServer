@@ -3,52 +3,89 @@ part of authServer;
 @app.Group('/auth')
 class AuthService
 {
-	@app.Route('/login', methods: const[app.POST])
-    Future<Map> loginUser(@app.Body(app.JSON) Map parameters) async
-    {
-		Random rand = new Random();
+	static Map<String,WebSocket> pendingVerifications = {};
 
-    	//TODO: this must be changed to not allow the client to dictate what the audience is
-    	//according to the persona docs. However, for testing purposes, this is a necessary evil.
-    	if(parameters['testing'] != null)
-    		audience = 'http://localhost:8080';
-    	if(parameters['audience'] != null)
-    		audience = parameters['audience'];
+	@app.Route('/verifyEmail', methods: const[app.POST])
+	Future<Map> verifyEmail(@app.Body(app.JSON) Map parameters) async
+	{
+		//create a unique link to click in the email
+		String token = uuid.v1();
+		String link = 'https://$serverUrl:8383/auth/verifyLink?token=$token&email=${parameters['email']}';
 
-    	Map body = {'assertion':parameters['assertion'],
-    				'audience':audience};
+		//store this in the database with their email so we can verify when they click the link
+		String query = 'INSERT INTO email_verifications(email,token) VALUES(@email,@token)';
+		int result = await dbConn.execute(query, {'email':parameters['email'],'token':token});
+		if(result < 1)
+			return {'result':'There was a problem saving the email/token to the database'};
 
-		//TODO find a way to mock this call for testing
-    	http.Response response = await http.post('https://verifier.login.persona.org/verify',body:body);
-		Map responseMap = JSON.decode(response.body);
+		//set our email server configs
+		SmtpOptions options = new SmtpOptions()
+			..hostName = 'smtp.childrenofur.com'
+			..port = 587
+			..username = 'test@childrenofur.com'
+			..password = 'we-might-be-11-Giants'
+			..requiresAuthentication = true;
 
-		if(responseMap['status'] == 'okay')
+		SmtpTransport transport = new SmtpTransport(options);
+
+		// Create the envelope to send.
+		Envelope envelope = new Envelope()
+			..from = 'noreply@childrenofur.com'
+			..fromName = 'Children of Ur'
+			..recipients.add(parameters['email'])
+			..subject = 'Verify your email'
+			..html = 'Thanks for signing up. In order to verify your email address, please click on the link below.<br><a href="$link">$link</a>';
+
+		// Finally, send it!
+		try
 		{
-			try
-			{
-				String sessionKey = await createSession(responseMap['email']);
-				String query = "SELECT * FROM metabolics AS m JOIN users AS u ON m.user_id = u.id WHERE u.username = @username";
-				List<Metabolics> m = await dbConn.query(query, Metabolics, {'username':SESSIONS[sessionKey].username});
-				Metabolics playerMetabolics = new Metabolics();
-				if(m.length > 0)
-					playerMetabolics = m[0];
-				Map response =  {'ok':'yes',
-						'slack-team':slackTeam,
-						'slack-token':bugToken,
-						'sc-token':scToken,
-						'sessionToken':sessionKey,
-						'playerName':SESSIONS[sessionKey].username,
-						'playerEmail':responseMap['email'],
-						'playerStreet':playerMetabolics.current_street,
-						'metabolics':JSON.encode(encode(playerMetabolics))};
-
-				return response;
-			}
-			catch(e){print(e);return {'ok':'no'};}
+			bool result = await transport.send(envelope);
+			if(result)
+				return {'result':'OK'};
+			else
+				return {'result':'FAIL'};
 		}
-		else
-			return {'ok':'no'};
-    }
+		catch(err)
+		{
+			return {'result':err};
+		}
+	}
+
+	@app.Route('/verifyLink')
+	Future verifyLink(@app.QueryParam() String email, @app.QueryParam() String token) async
+	{
+		if(AuthService.pendingVerifications[email] != null)
+		{
+			String query = "SELECT * FROM email_verifications WHERE email = @email";
+			List<EmailVerification> results = await dbConn.query(query, EmailVerification, {'email':email});
+			if(results.length > 0)
+			{
+				EmailVerification result = results[0];
+				if(result.token == token)
+				{
+					String sessionKey = await createSession(email);
+    				String query = "SELECT * FROM metabolics AS m JOIN users AS u ON m.user_id = u.id WHERE u.username = @username";
+    				List<Metabolics> m = await dbConn.query(query, Metabolics, {'username':SESSIONS[sessionKey].username});
+    				Metabolics playerMetabolics = new Metabolics();
+    				if(m.length > 0)
+    					playerMetabolics = m[0];
+					Map serverdata =  {'slack-team':slackTeam,
+                						'slack-token':bugToken,
+                						'sc-token':scToken,
+                						'sessionToken':sessionKey,
+                						'playerName':SESSIONS[sessionKey].username,
+                						'playerEmail':email,
+                						'playerStreet':playerMetabolics.current_street,
+                						'metabolics':JSON.encode(encode(playerMetabolics))};
+					Map response = {'result':'success','serverdata':serverdata};
+					AuthService.pendingVerifications[email].add(JSON.encode(response));
+					return "Email Verified. You may close this window.";
+				}
+			}
+		}
+
+		return "Invalid Link";
+	}
 
 	@app.Route('/logout', methods: const[app.POST])
     Map logoutUser(@app.Body(app.JSON) Map parameters)
@@ -100,4 +137,13 @@ class AuthService
 		SESSIONS[sessionKey] = session;
 		return sessionKey;
 	}
+}
+
+class EmailVerification
+{
+	@Field()
+	String email;
+
+	@Field()
+	String token;
 }
