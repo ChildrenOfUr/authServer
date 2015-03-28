@@ -69,6 +69,11 @@ class AuthService
 					Map serverdata = getSession({'email':email});
 					Map response = {'result':'success','serverdata':serverdata};
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
+
+					//delete pending row from database
+					query = "DELETE FROM email_verifications WHERE id = @id";
+					await dbConn.execute(query,result);
+
 					return "Email Verified. You may close this window.";
 				}
 			}
@@ -151,6 +156,9 @@ class AuthService
 
 class EmailVerification
 {
+	@Field()
+	int id;
+
 	@Field()
 	String email;
 
