@@ -13,7 +13,8 @@ class AuthService
 
 		//create a unique link to click in the email
 		String token = uuid.v1();
-		String link = 'https://$serverUrl:8383/auth/verifyLink?token=$token&email=${parameters['email']}';
+		String email = Uri.encodeQueryComponent(parameters['email']);
+		String link = 'https://$serverUrl:8383/auth/verifyLink?token=$token&email=$email';
 
 		//store this in the database with their email so we can verify when they click the link
 		String query = 'INSERT INTO email_verifications(email,token) VALUES(@email,@token)';

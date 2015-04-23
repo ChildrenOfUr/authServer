@@ -1,7 +1,7 @@
 .pub
 certdb/
 API_KEYS.dart
-packages/
+packages
 pubspec.lock
 build
 *.swp

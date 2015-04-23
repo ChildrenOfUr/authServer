@@ -3,7 +3,6 @@ library authServer;
 import "dart:io";
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import "package:args/args.dart";
 import "package:http/http.dart" as http;
