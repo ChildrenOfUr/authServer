@@ -60,13 +60,16 @@ class AuthService
 	{
 		if(AuthService.pendingVerifications[email] != null)
 		{
+			print('found pendingVerification for $email');
 			String query = "SELECT * FROM email_verifications WHERE email = @email";
 			List<EmailVerification> results = await dbConn.query(query, EmailVerification, {'email':email});
 			if(results.length > 0)
 			{
+				print('found emailverification in db');
 				EmailVerification result = results[0];
 				if(result.token == token)
 				{
+					print('token is equal, will be success');
 					Map serverdata = await getSession({'email':email});
 					Map response = {'result':'success','serverdata':serverdata};
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
@@ -77,7 +80,9 @@ class AuthService
 
 					return "Email Verified. You may close this window.";
 				}
+				print('tokens are not equal');
 			}
+			print('didnt find emailverification in db');
 		}
 
 		return "Invalid Link";
