@@ -24,10 +24,10 @@ class AuthService
 
 		//set our email server configs
 		SmtpOptions options = new SmtpOptions()
-			..hostName = 'smtp.childrenofur.com'
-			..port = 587
-			..username = 'test@childrenofur.com'
-			..password = 'we-might-be-11-Giants'
+			..hostName = emailHostName
+			..port = emailPort
+			..username = emailUsername
+			..password = emailPassword
 			..requiresAuthentication = true;
 
 		SmtpTransport transport = new SmtpTransport(options);
