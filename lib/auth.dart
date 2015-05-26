@@ -4,6 +4,9 @@ part of authServer;
 class AuthService
 {
 	static Map<String,WebSocket> pendingVerifications = {};
+	
+	static String verifiedOutput = '<!DOCTYPE html><html><head> <title>Children of Ur Login</title> <link rel="stylesheet" href="http://childrenofur.com/wordpress/wp-content/themes/coui-wp/css/rockoflf.css"> <link href="http://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet" type="text/css"> <style>body{padding: 0; margin: 0; font-family: "Lato", sans-serif}nav{background-image: linear-gradient(to bottom, #fff 0, #f8f8f8 100%); background-repeat: repeat-x; border-radius: 4px; -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), 0 1px 5px rgba(0, 0, 0, .075); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), 0 1px 5px rgba(0, 0, 0, .075); padding-left: 15px; padding-right: 15px; height: 50px; margin: 0; color: #4b2e4c}nav img{margin-top: 10px; height: 30px; width: auto}nav span{top: -8px; left: 10px; position: relative; font-weight: 700}main{padding: 20px; font-size: 30px; font-weight: 700; text-align: center}h1{color: green; font-size: 100px; margin: 20px}</style></head><body> <nav> <img src="http://childrenofur.com/assets/logo-ur.svg" alt="Children of Ur">&nbsp;<span>Logging In</span> </nav> <main> <h1>&#10003;</h1> <h2>Email Verified!</h2> <h3>You may close this window.</h3> </main></body></html>';
+	static String invalidOutput = '<!DOCTYPE html><html><head> <title>Children of Ur Login</title> <link rel="stylesheet" href="http://childrenofur.com/wordpress/wp-content/themes/coui-wp/css/rockoflf.css"> <link href="http://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet" type="text/css"> <style>body{padding: 0; margin: 0; font-family: "Lato", sans-serif}nav{background-image: linear-gradient(to bottom, #fff 0, #f8f8f8 100%); background-repeat: repeat-x; border-radius: 4px; -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), 0 1px 5px rgba(0, 0, 0, .075); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), 0 1px 5px rgba(0, 0, 0, .075); padding-left: 15px; padding-right: 15px; height: 50px; margin: 0; color: #4b2e4c}nav img{margin-top: 10px; height: 30px; width: auto}nav span{top: -8px; left: 10px; position: relative; font-weight: 700}main{padding: 20px; font-size: 30px; font-weight: 700; text-align: center}h1{color: #8b0000; font-size: 100px; margin: 20px}a{color: #4b2e4c}</style></head><body> <nav> <img src="http://childrenofur.com/assets/logo-ur.svg" alt="Children of Ur"> <span>Logging In</span> </nav> <main> <h1>&#x2717;</h1> <h2>Uh oh!</h2> <h3>That link was invalid.</h3> <h4>Please try again, and <a href="http://childrenofur.com/help/#contact">let us know</a> if it happens more than once.</h4> </main></body></html>';
 
 	@app.Route('/verifyEmail', methods: const[app.POST])
 	Future<Map> verifyEmail(@app.Body(app.JSON) Map parameters) async
@@ -75,12 +78,12 @@ class AuthService
 					query = "DELETE FROM email_verifications WHERE id = @id";
 					await dbConn.execute(query,result);
 
-					return "Email Verified. You may close this window.";
+					return verifiedOutput;
 				}
 			}
 		}
 
-		return "Invalid Link";
+		return invalidOutput;
 	}
 
 	@app.Route('/getSession', methods: const[app.POST])
