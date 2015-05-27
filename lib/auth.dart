@@ -29,7 +29,7 @@ class AuthService
 		else {
 			updateQuery =  'UPDATE email_verification SET token = @token';
 		}
-		int result = await dbConn.execute(query, {'email':parameters['email'], 'token':token});
+		int result = await dbConn.execute(updateQuery, {'email':parameters['email'], 'token':token});
 		if (result < 1)
 			return {'result':'There was a problem saving the email/token to the database'};
 
