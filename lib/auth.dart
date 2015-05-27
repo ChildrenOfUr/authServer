@@ -11,23 +11,35 @@ class AuthService
 		if(parameters['email'] == null)
 			return {'ok':'no'};
 
+
 		//create a unique link to click in the email
 		String token = uuid.v1();
 		String email = Uri.encodeQueryComponent(parameters['email']);
 		String link = 'https://$serverUrl:8383/auth/verifyLink?token=$token&email=$email';
 
+		//check to see if we've already tried to verify.
+		String query = "SELECT * FROM email_verifications WHERE email = @email";
+		List<EmailVerification> verificationResults = await dbConn.query(query, EmailVerification, {'email':email});
+
 		//store this in the database with their email so we can verify when they click the link
-		String query = 'INSERT INTO email_verifications(email,token) VALUES(@email,@token)';
-		int result = await dbConn.execute(query, {'email':parameters['email'],'token':token});
-		if(result < 1)
+		String updateQuery;
+		if (results.length == 0) {
+			updateQuery = 'INSERT INTO email_verifications(email,token) VALUES(@email,@token)';
+		}
+		else {
+			updateQuery =  'UPDATE email_verification SET token = @token';
+		}
+		int result = await dbConn.execute(query, {'email':parameters['email'], 'token':token});
+		if (result < 1)
 			return {'result':'There was a problem saving the email/token to the database'};
+
 
 		//set our email server configs
 		SmtpOptions options = new SmtpOptions()
-			..hostName = 'smtp.childrenofur.com'
-			..port = 587
-			..username = 'test@childrenofur.com'
-			..password = 'we-might-be-11-Giants'
+			..hostName = emailHostName
+			..port = emailPort
+			..username = emailUsername
+			..password = emailPassword
 			..requiresAuthentication = true;
 
 		SmtpTransport transport = new SmtpTransport(options);
