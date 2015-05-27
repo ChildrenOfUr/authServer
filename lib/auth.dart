@@ -1,17 +1,9 @@
 part of authServer;
 
-import 'dart:io';
-import 'dart:async';
-
 @app.Group('/auth')
 class AuthService
 {
 	static Map<String,WebSocket> pendingVerifications = {};
-
-	static File verifiedOutputFile = new File("output_verified.html");
-	static File errorOutputFile = new File("output_error.html");
-	static String verifiedOutput = await (verifiedOutputFile.readAsString());
-	static String errorOutput = await (errorOutputFile.readAsString());
 
 	@app.Route('/verifyEmail', methods: const[app.POST])
 	Future<Map> verifyEmail(@app.Body(app.JSON) Map parameters) async

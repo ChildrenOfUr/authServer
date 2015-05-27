@@ -30,8 +30,10 @@ ArgResults argResults;
 bool loadCert = true;
 PostgreSqlManager dbManager;
 
-void main(List<String> arguments)
-{
+File verifiedOutputFile, errorOutputFile;
+String verifiedOutput, errorOutput;
+
+Future main(List<String> arguments) async {
   //setup command line argument parsing
   final parser = new ArgParser()
   //use --no-load-cert to ignore certification loading
@@ -73,6 +75,12 @@ void main(List<String> arguments)
 	}
 
 	VerifyHandler.init();
+
+	verifiedOutputFile = new File("output_verified.html");
+	errorOutputFile = new File("output_error.html");
+
+	verifiedOutput = await (verifiedOutputFile.readAsString());
+	errorOutput = await (errorOutputFile.readAsString());
 }
 
 //add a CORS header to every request
