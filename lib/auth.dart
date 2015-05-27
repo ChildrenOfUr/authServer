@@ -23,7 +23,7 @@ class AuthService
 
 		//store this in the database with their email so we can verify when they click the link
 		String updateQuery;
-		if (results.length == 0) {
+		if (verificationResults.length == 0) {
 			updateQuery = 'INSERT INTO email_verifications(email,token) VALUES(@email,@token)';
 		}
 		else {
