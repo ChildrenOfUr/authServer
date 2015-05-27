@@ -76,8 +76,8 @@ Future main(List<String> arguments) async {
 
 	VerifyHandler.init();
 
-	verifiedOutputFile = new File("output_verified.html");
-	errorOutputFile = new File("output_error.html");
+	verifiedOutputFile = new File("authServer/bin/output_verified.html");
+	errorOutputFile = new File("authServer/bin/output_error.html");
 
 	verifiedOutput = await (verifiedOutputFile.readAsString());
 	errorOutput = await (errorOutputFile.readAsString());
