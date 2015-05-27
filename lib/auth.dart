@@ -67,7 +67,7 @@ class AuthService
 		}
 	}
 
-	@app.Route('/verifyLink')
+	@app.Route('/verifyLink', responseType: "text/html")
 	Future verifyLink(@app.QueryParam() String email, @app.QueryParam() String token) async
 	{
 		if(AuthService.pendingVerifications[email] != null)
