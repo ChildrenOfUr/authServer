@@ -128,6 +128,8 @@ class AuthService
 	@app.Route('/setusername', methods: const[app.POST])
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
+		print('setusername with: $parameters');
+		print('got from token this email: ${SESSIONS[parameters['token']].email}');
 		try
 		{
 			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
@@ -136,14 +138,15 @@ class AuthService
                           'email':SESSIONS[parameters['token']].email,
                           'bio':''
                          };
-			int userId = await dbConn.execute(query,params);
+			int result = await dbConn.execute(query,params);
 
-			if(userId != 0)
+			print('result code: $result');
+			if(result != 0)
 				return {'ok':'yes'};
 			else
 				return {'ok':'no'};
 		}
-		catch(e){return {'ok':'no'};}
+		catch(e){print('oops, an exception: $e');return {'ok':'no'};}
 	}
 
 	PostgreSql get dbConn => app.request.attributes.dbConn;
