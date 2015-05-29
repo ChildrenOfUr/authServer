@@ -155,7 +155,7 @@ class AuthService
 				'bio':''
 			};
 			int result = await dbConn.execute(query, params);
-			print('inserted $map into users');
+			print('inserted $params into users');
 		}
 			catch(e) {print('INSERT oops, an exception: $e');return {'ok':'no'};}
 
