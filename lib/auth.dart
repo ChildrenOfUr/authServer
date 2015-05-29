@@ -147,34 +147,37 @@ class AuthService
 	{
 		print('setusername with: $parameters');
 		print('got from token this email: ${SESSIONS[parameters['token']].email}');
-		try
-		{
+		try {
 			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
-            Map params = {
-                          'username':parameters['username'],
-                          'email':SESSIONS[parameters['token']].email,
-                          'bio':''
-                         };
-			int result = await dbConn.execute(query,params);
-
-			// Just verified? Delete table entry.
-			String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
-			List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
-
-			if (!results.isEmpty) {
-				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-				await dbConn.execute(deleteQuery, result);
-			}
-
-
-
-			print('result code: $result');
-			if(result != 0)
-				return {'ok':'yes'};
-			else
-				return {'ok':'no'};
+			Map params = {
+				'username':parameters['username'],
+				'email':SESSIONS[parameters['token']].email,
+				'bio':''
+			};
+			int result = await dbConn.execute(query, params);
+			print('inserted $map into users');
 		}
-		catch(e){print('oops, an exception: $e');return {'ok':'no'};}
+			catch(e) {print('INSERT oops, an exception: $e');return {'ok':'no'};}
+
+			try{
+
+				// Just verified? Delete table entry.
+				String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
+				List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
+
+				if (results.isNotEmpty()) {
+					String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
+					await dbConn.execute(deleteQuery, result);
+				}
+				//
+
+				print('result code: $result');
+				if(result != 0)
+					return {'ok':'yes'};
+				else
+					return {'ok':'no'};
+		}
+		catch(e){print('DELETE oops, an exception: $e');return {'ok':'no'};}
 	}
 
 	PostgreSql get dbConn => app.request.attributes.dbConn;
