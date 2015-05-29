@@ -156,28 +156,22 @@ class AuthService
 			};
 			int result = await dbConn.execute(query, params);
 			print('inserted $params into users');
+
+			// Just verified? Delete table entry.
+			String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
+			List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
+
+			if (results.isNotEmpty) {
+				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
+				await dbConn.execute(deleteQuery, results[0]);
+			}
+
+			if(result != 0)
+				return {'ok':'yes'};
+			else
+				return {'ok':'no'};
 		}
-			catch(e) {print('INSERT oops, an exception: $e');return {'ok':'no'};}
-
-			try{
-
-				// Just verified? Delete table entry.
-				String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
-				List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
-
-				if (results.isNotEmpty) {
-					String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-					await dbConn.execute(deleteQuery, results[0]);
-				}
-				//
-
-				print('result code: $results[0]');
-				if(results[0] != 0)
-					return {'ok':'yes'};
-				else
-					return {'ok':'no'};
-		}
-		catch(e){print('DELETE oops, an exception: $e');return {'ok':'no'};}
+		catch(e){print('oops, an exception: $e');return {'ok':'no'};}
 	}
 
 	PostgreSql get dbConn => app.request.attributes.dbConn;
