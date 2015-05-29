@@ -5,14 +5,19 @@ class AuthService
 {
 	static Map<String,WebSocket> pendingVerifications = {};
 
-
-
-	@app.Route('/checkVerify', methods: const[app.POST])
-	Future<bool> checkVerify(@app.Body(app.JSON) Map parameters) async {
+	@app.Route('/isVerified', methods: const[app.POST])
+	Future<Map> isVerified(@app.Body(app.JSON) Map parameters) async {
 		if(parameters['email'] == null)
 			return {'ok':'no'};
 
+		//check to see if we've already tried to verify.
+		String query = "SELECT * FROM email_verifications WHERE email = @email";
+		List<EmailVerification> result = await dbConn.query(query, EmailVerification, {'email':email});
 
+		if (!result.isEmpty && result[0].verified == true)
+			return {'ok':'yes'};
+		else
+			return {'ok':'no'};
 	}
 
 	@app.Route('/verifyEmail', methods: const[app.POST])
@@ -93,11 +98,12 @@ class AuthService
 					Map response = {'result':'success','serverdata':serverdata};
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
 
-					//delete pending row from database
-					if (result.verified == true) {
-						query = "DELETE FROM email_verifications WHERE id = @id";
-						await dbConn.execute(query, result);
-					}
+					//set verified to true
+					query = "UPDATE email_verifications SET verified = true WHERE email = @email";
+					//query = "DELETE FROM email_verifications WHERE id = @id";
+					int setResult = await dbConn.execute(query, result);
+					if (setResult < 1)
+						return {'result':'There was a problem saving verifying the email'};
 					return verifiedOutput;
 				}
 			}
@@ -139,6 +145,17 @@ class AuthService
 	@app.Route('/setusername', methods: const[app.POST])
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
+		// Just verified? Delete table entry.
+		String query = "SELECT * FROM email_verifications WHERE email = @email";
+		List<EmailVerification> results = await dbConn.query(query, EmailVerification, {'email':email});
+		if (!results.isEmpty && results.verified == true) {
+			deleteQuery = "DELETE FROM email_verifications WHERE id = @id";
+			await dbConn.execute(deleteQuery, result);
+		}
+
+
+
+
 		print('setusername with: $parameters');
 		print('got from token this email: ${SESSIONS[parameters['token']].email}');
 		try
