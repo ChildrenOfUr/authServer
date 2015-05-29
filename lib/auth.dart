@@ -167,12 +167,12 @@ class AuthService
 
 				if (results.isNotEmpty) {
 					String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-					await dbConn.execute(deleteQuery, result);
+					await dbConn.execute(deleteQuery, results[0]);
 				}
 				//
 
-				print('result code: $result');
-				if(result != 0)
+				print('result code: $results[0]');
+				if(results[0] != 0)
 					return {'ok':'yes'};
 				else
 					return {'ok':'no'};
