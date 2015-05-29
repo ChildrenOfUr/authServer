@@ -5,6 +5,16 @@ class AuthService
 {
 	static Map<String,WebSocket> pendingVerifications = {};
 
+
+
+	@app.Route('/checkVerify', methods: const[app.POST])
+	Future<bool> checkVerify(@app.Body(app.JSON) Map parameters) async {
+		if(parameters['email'] == null)
+			return {'ok':'no'};
+
+
+	}
+
 	@app.Route('/verifyEmail', methods: const[app.POST])
 	Future<Map> verifyEmail(@app.Body(app.JSON) Map parameters) async
 	{
@@ -84,9 +94,10 @@ class AuthService
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
 
 					//delete pending row from database
-					query = "DELETE FROM email_verifications WHERE id = @id";
-					await dbConn.execute(query,result);
-
+					if (result.verified == true) {
+						query = "DELETE FROM email_verifications WHERE id = @id";
+						await dbConn.execute(query, result);
+					}
 					return verifiedOutput;
 				}
 			}
@@ -182,4 +193,7 @@ class EmailVerification
 
 	@Field()
 	String token;
+
+	@Field()
+	bool verified;
 }
