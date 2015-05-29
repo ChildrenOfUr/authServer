@@ -165,7 +165,7 @@ class AuthService
 				String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
 				List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
 
-				if (results.isNotEmpty()) {
+				if (results.isNotEmpty) {
 					String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
 					await dbConn.execute(deleteQuery, result);
 				}
