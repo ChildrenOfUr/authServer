@@ -145,8 +145,6 @@ class AuthService
 	@app.Route('/setusername', methods: const[app.POST])
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
-		print('parameters $parameters');
-
 		print('setusername with: $parameters');
 		print('got from token this email: ${SESSIONS[parameters['token']].email}');
 		try
@@ -161,7 +159,7 @@ class AuthService
 
 			// Just verified? Delete table entry.
 			String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
-			List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':email});
+			List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
 
 			if (!results.isEmpty && results.verified == true) {
 				deleteQuery = "DELETE FROM email_verifications WHERE id = @id";
