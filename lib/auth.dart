@@ -145,16 +145,6 @@ class AuthService
 	@app.Route('/setusername', methods: const[app.POST])
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
-		// Just verified? Delete table entry.
-		String query = "SELECT * FROM email_verifications WHERE email = @email";
-		List<EmailVerification> results = await dbConn.query(query, EmailVerification, {'email':email});
-		if (!results.isEmpty && results.verified == true) {
-			deleteQuery = "DELETE FROM email_verifications WHERE id = @id";
-			await dbConn.execute(deleteQuery, result);
-		}
-
-
-
 
 		print('setusername with: $parameters');
 		print('got from token this email: ${SESSIONS[parameters['token']].email}');
@@ -167,6 +157,17 @@ class AuthService
                           'bio':''
                          };
 			int result = await dbConn.execute(query,params);
+
+			// Just verified? Delete table entry.
+			String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
+			List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':email});
+
+			if (!results.isEmpty && results.verified == true) {
+				deleteQuery = "DELETE FROM email_verifications WHERE id = @id";
+				await dbConn.execute(deleteQuery, result);
+			}
+
+
 
 			print('result code: $result');
 			if(result != 0)
