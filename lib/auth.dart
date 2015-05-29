@@ -145,6 +145,7 @@ class AuthService
 	@app.Route('/setusername', methods: const[app.POST])
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
+		print('parameters $parameters');
 
 		print('setusername with: $parameters');
 		print('got from token this email: ${SESSIONS[parameters['token']].email}');
