@@ -81,11 +81,6 @@ class AuthService
 					Map serverdata = await getSession({'email':email});
 					Map response = {'result':'success','serverdata':serverdata};
 
-					// Websocket must be open to verify.
-					if (pendingVerifications[email] == null) {
-						return errorOutput;
-					}
-
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
 
 					//set verified to true
