@@ -9,6 +9,7 @@ class AuthService
 	Future<Map> isVerified(@app.Body(app.JSON) Map parameters) async {
 		if(parameters['email'] == null)
 			return {'ok':'no'};
+		String email = parameters['email'];
 
 		//check to see if we've already tried to verify.
 		String query = "SELECT * FROM email_verifications WHERE email = @email";
@@ -100,7 +101,6 @@ class AuthService
 
 					//set verified to true
 					query = "UPDATE email_verifications SET verified = true WHERE email = @email";
-					//query = "DELETE FROM email_verifications WHERE id = @id";
 					int setResult = await dbConn.execute(query, result);
 					if (setResult < 1)
 						return {'result':'There was a problem saving verifying the email'};
@@ -108,7 +108,6 @@ class AuthService
 				}
 			}
 		}
-
 		return errorOutput;
 	}
 
