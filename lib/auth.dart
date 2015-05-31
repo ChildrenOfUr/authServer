@@ -5,28 +5,11 @@ class AuthService
 {
 	static Map<String,WebSocket> pendingVerifications = {};
 
-	@app.Route('/isVerified', methods: const[app.POST])
-	Future<Map> isVerified(@app.Body(app.JSON) Map parameters) async {
-		if(parameters['email'] == null)
-			return {'ok':'no'};
-		String email = parameters['email'];
-
-		//check to see if we've already tried to verify.
-		String query = "SELECT * FROM email_verifications WHERE email = @email";
-		List<EmailVerification> result = await dbConn.query(query, EmailVerification, {'email':email});
-
-		if (!result.isEmpty && result[0].verified == true)
-			return {'ok':'yes'};
-		else
-			return {'ok':'no'};
-	}
-
 	@app.Route('/verifyEmail', methods: const[app.POST])
 	Future<Map> verifyEmail(@app.Body(app.JSON) Map parameters) async
 	{
 		if(parameters['email'] == null)
 			return {'ok':'no'};
-
 
 		//create a unique link to click in the email
 		String token = uuid.v1();
@@ -97,6 +80,12 @@ class AuthService
 				{
 					Map serverdata = await getSession({'email':email});
 					Map response = {'result':'success','serverdata':serverdata};
+
+					// Websocket must be open to verify.
+					if (pendingVerifications[email] != null) {
+						return errorOutput;
+					}
+
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
 
 					//set verified to true
