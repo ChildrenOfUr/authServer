@@ -82,7 +82,7 @@ class AuthService
 					Map response = {'result':'success','serverdata':serverdata};
 
 					// Websocket must be open to verify.
-					if (pendingVerifications[email] != null) {
+					if (pendingVerifications[email] == null) {
 						return errorOutput;
 					}
 
