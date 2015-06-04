@@ -105,8 +105,7 @@ class AuthService
 		Metabolics playerMetabolics = new Metabolics();
 		if(m.length > 0)
 			playerMetabolics = m[0];
-		Map serverdata =  {'slack-team':slackTeam,
-    						'slack-token':bugToken,
+		Map serverdata =  {'slack-webhook':couWebhook,
     						'sc-token':scToken,
     						'sessionToken':sessionKey,
     						'playerName':SESSIONS[sessionKey].username,
