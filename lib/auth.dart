@@ -11,7 +11,6 @@ class AuthService
 		if(parameters['email'] == null)
 			return {'ok':'no'};
 
-
 		//create a unique link to click in the email
 		String token = uuid.v1();
 		String email = Uri.encodeQueryComponent(parameters['email']);
@@ -81,17 +80,18 @@ class AuthService
 				{
 					Map serverdata = await getSession({'email':email});
 					Map response = {'result':'success','serverdata':serverdata};
+
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
 
-					//delete pending row from database
-					query = "DELETE FROM email_verifications WHERE id = @id";
-					await dbConn.execute(query,result);
-
+					//set verified to true
+					query = "UPDATE email_verifications SET verified = true WHERE email = @email";
+					int setResult = await dbConn.execute(query, result);
+					if (setResult < 1)
+						return {'result':'There was a problem saving verifying the email'};
 					return verifiedOutput;
 				}
 			}
 		}
-
 		return errorOutput;
 	}
 
@@ -129,17 +129,25 @@ class AuthService
 	{
 		print('setusername with: $parameters');
 		print('got from token this email: ${SESSIONS[parameters['token']].email}');
-		try
-		{
+		try {
 			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
-            Map params = {
-                          'username':parameters['username'],
-                          'email':SESSIONS[parameters['token']].email,
-                          'bio':''
-                         };
-			int result = await dbConn.execute(query,params);
+			Map params = {
+				'username':parameters['username'],
+				'email':SESSIONS[parameters['token']].email,
+				'bio':''
+			};
+			int result = await dbConn.execute(query, params);
+			print('inserted $params into users');
 
-			print('result code: $result');
+			// Just verified? Delete table entry.
+			String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
+			List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
+
+			if (results.isNotEmpty) {
+				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
+				await dbConn.execute(deleteQuery, results[0]);
+			}
+
 			if(result != 0)
 				return {'ok':'yes'};
 			else
@@ -181,4 +189,7 @@ class EmailVerification
 
 	@Field()
 	String token;
+
+	@Field()
+	bool verified;
 }
