@@ -130,6 +130,10 @@ class AuthService
 		print('setusername with: $parameters');
 		print('got from token this email: ${SESSIONS[parameters['token']].email}');
 		try {
+			if(!SESSIONS.containsKey(parameters['token'])) {
+				return {'ok':'no'};
+			}
+
 			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
 			Map params = {
 				'username':parameters['username'],
