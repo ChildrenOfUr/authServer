@@ -27,7 +27,7 @@ class Metabolics
 	int lifetime_img = 0;
 
 	@Field()
-	String current_street = 'LA58KK7B9O522PC';
+	String current_street = 'LIF12PMQ5121D68';
 
 	@Field()
 	num current_street_x = 1.0;
