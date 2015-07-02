@@ -1,9 +1,8 @@
 part of authServer;
 
 @app.Group('/auth')
-class AuthService
-{
-	static Map<String,WebSocket> pendingVerifications = {};
+class AuthService {
+	static Map<String, WebSocket> pendingVerifications = {};
 
 	@app.Route('/verifyEmail', methods: const[app.POST])
 	Future<Map> verifyEmail(@app.Body(app.JSON) Map parameters) async
@@ -22,14 +21,14 @@ class AuthService
 
 		//store this in the database with their email so we can verify when they click the link
 		String updateQuery;
-		if (verificationResults.length == 0) {
+		if(verificationResults.length == 0) {
 			updateQuery = 'INSERT INTO email_verifications(email,token) VALUES(@email,@token)';
 		}
 		else {
-			updateQuery =  'UPDATE email_verification SET token = @token';
+			updateQuery = 'UPDATE email_verification SET token = @token';
 		}
 		int result = await dbConn.execute(updateQuery, {'email':parameters['email'], 'token':token});
-		if (result < 1)
+		if(result < 1)
 			return {'result':'There was a problem saving the email/token to the database'};
 
 
@@ -52,16 +51,14 @@ class AuthService
 			..html = 'Thanks for signing up. In order to verify your email address, please click on the link below.<br><a href="$link">$link</a>';
 
 		// Finally, send it!
-		try
-		{
+		try {
 			bool result = await transport.send(envelope);
 			if(result)
 				return {'result':'OK'};
 			else
 				return {'result':'FAIL'};
 		}
-		catch(err)
-		{
+		catch(err) {
 			return {'result':err};
 		}
 	}
@@ -69,24 +66,21 @@ class AuthService
 	@app.Route('/verifyLink', responseType: "text/html")
 	Future verifyLink(@app.QueryParam() String email, @app.QueryParam() String token) async
 	{
-		if(AuthService.pendingVerifications[email] != null)
-		{
+		if(AuthService.pendingVerifications[email] != null) {
 			String query = "SELECT * FROM email_verifications WHERE email = @email";
 			List<EmailVerification> results = await dbConn.query(query, EmailVerification, {'email':email});
-			if(results.length > 0)
-			{
+			if(results.length > 0) {
 				EmailVerification result = results[0];
-				if(result.token == token)
-				{
+				if(result.token == token) {
 					Map serverdata = await getSession({'email':email});
-					Map response = {'result':'success','serverdata':serverdata};
+					Map response = {'result':'success', 'serverdata':serverdata};
 
 					AuthService.pendingVerifications[email].add(JSON.encode(response));
 
 					//set verified to true
 					query = "UPDATE email_verifications SET verified = true WHERE email = @email";
 					int setResult = await dbConn.execute(query, result);
-					if (setResult < 1)
+					if(setResult < 1)
 						return {'result':'There was a problem saving verifying the email'};
 					return verifiedOutput;
 				}
@@ -105,31 +99,37 @@ class AuthService
 		Metabolics playerMetabolics = new Metabolics();
 		if(m.length > 0)
 			playerMetabolics = m[0];
-		Map serverdata =  {'slack-webhook':couWebhook,
-    						'sc-token':scToken,
-    						'sessionToken':sessionKey,
-    						'playerName':SESSIONS[sessionKey].username,
-    						'playerEmail':email,
-    						'playerStreet':playerMetabolics.current_street,
-    						'metabolics':JSON.encode(encode(playerMetabolics))};
+		Map serverdata = {'slack-webhook':couWebhook,
+			'slack-bug-webhook':bugWebhook,
+			'sc-token':scToken,
+			'sessionToken':sessionKey,
+			'playerName':SESSIONS[sessionKey].username,
+			'playerEmail':email,
+			'playerStreet':playerMetabolics.current_street,
+			'metabolics':JSON.encode(encode(playerMetabolics))};
 
 		return serverdata;
 	}
 
 	@app.Route('/logout', methods: const[app.POST])
-    Map logoutUser(@app.Body(app.JSON) Map parameters)
-    {
+	Map logoutUser(@app.Body(app.JSON) Map parameters) {
 		//should remove any session key associated with parameters['sessionToken']
 		SESSIONS.remove([parameters['sessionToken']]);
 		return {'ok':'yes'};
-    }
+	}
 
 	@app.Route('/setusername', methods: const[app.POST])
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
-		print('setusername with: $parameters');
-		print('got from token this email: ${SESSIONS[parameters['token']].email}');
 		try {
+			print('setusername with: $parameters');
+
+			if(!SESSIONS.containsKey(parameters['token'])) {
+				return {'ok':'no'};
+			}
+
+			print('got from token this email: ${SESSIONS[parameters['token']].email}');
+
 			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
 			Map params = {
 				'username':parameters['username'],
@@ -140,23 +140,19 @@ class AuthService
 			print('inserted $params into users');
 
 			// Just verified? Delete table entry.
-			String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
-			List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
-
-			if (results.isNotEmpty) {
-				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-				await dbConn.execute(deleteQuery, results[0]);
-			}
+			String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
+			await dbConn.execute(deleteQuery, SESSIONS[parameters['token']].email);
 
 			if(result != 0)
 				return {'ok':'yes'};
 			else
 				return {'ok':'no'};
 		}
-		catch(e){print('oops, an exception: $e');return {'ok':'no'};}
+		catch(e) {
+			print('oops, an exception: $e');
+			return {'ok':'no'};
+		}
 	}
-
-	PostgreSql get dbConn => app.request.attributes.dbConn;
 
 	//creates an entry in the SESSIONS map and returns the username associated with the session
 	Future<String> createSession(String email) async
@@ -179,8 +175,7 @@ class AuthService
 	}
 }
 
-class EmailVerification
-{
+class EmailVerification {
 	@Field()
 	int id;
 
