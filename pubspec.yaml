@@ -9,10 +9,8 @@ dependencies:
   http: any
   uuid: any
   args: any
-  async_await:
-    git: https://github.com/dart-lang/async_await.git
   mailer: ">=0.8.12 <0.9.0"
+  path: "^1.3.5"
+
 dev_dependencies:
   unittest: any
-transformers:
-- async_await

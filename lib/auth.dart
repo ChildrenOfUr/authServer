@@ -121,12 +121,14 @@ class AuthService {
 	@app.Route('/setusername', methods: const[app.POST])
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
-		print('setusername with: $parameters');
-		print('got from token this email: ${SESSIONS[parameters['token']].email}');
 		try {
+			print('setusername with: $parameters');
+
 			if(!SESSIONS.containsKey(parameters['token'])) {
 				return {'ok':'no'};
 			}
+
+			print('got from token this email: ${SESSIONS[parameters['token']].email}');
 
 			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
 			Map params = {
@@ -138,13 +140,8 @@ class AuthService {
 			print('inserted $params into users');
 
 			// Just verified? Delete table entry.
-			String verificationQuery = "SELECT * FROM email_verifications WHERE email = @email";
-			List<EmailVerification> results = await dbConn.query(verificationQuery, EmailVerification, {'email':SESSIONS[parameters['token']].email});
-
-			if(results.isNotEmpty) {
-				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-				await dbConn.execute(deleteQuery, results[0]);
-			}
+			String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
+			await dbConn.execute(deleteQuery, SESSIONS[parameters['token']].email);
 
 			if(result != 0)
 				return {'ok':'yes'};
@@ -156,8 +153,6 @@ class AuthService {
 			return {'ok':'no'};
 		}
 	}
-
-	PostgreSql get dbConn => app.request.attributes.dbConn;
 
 	//creates an entry in the SESSIONS map and returns the username associated with the session
 	Future<String> createSession(String email) async
