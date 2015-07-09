@@ -7,8 +7,9 @@ class AuthService {
 	@app.Route('/verifyEmail', methods: const[app.POST])
 	Future<Map> verifyEmail(@app.Body(app.JSON) Map parameters) async
 	{
-		if(parameters['email'] == null)
+		if(parameters['email'] == null) {
 			return {'ok':'no'};
+		}
 
 		//create a unique link to click in the email
 		String token = uuid.v1();
@@ -25,11 +26,12 @@ class AuthService {
 			updateQuery = 'INSERT INTO email_verifications(email,token) VALUES(@email,@token)';
 		}
 		else {
-			updateQuery = 'UPDATE email_verification SET token = @token';
+			updateQuery = 'UPDATE email_verification SET token = @token WHERE email = @email';
 		}
 		int result = await dbConn.execute(updateQuery, {'email':parameters['email'], 'token':token});
-		if(result < 1)
+		if(result < 1) {
 			return {'result':'There was a problem saving the email/token to the database'};
+		}
 
 
 		//set our email server configs
