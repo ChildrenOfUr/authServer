@@ -124,14 +124,21 @@ class AuthService {
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
 		try {
-			print('setusername with: $parameters');
+			print('setusername called with: $parameters');
 
 			if(!SESSIONS.containsKey(parameters['token'])) {
 				return {'ok':'no'};
 			}
 
 			print('got from token this email: ${SESSIONS[parameters['token']].email}');
-
+			//check for existing username
+			String query = "SELECT username FROM users WHERE username = @username";
+			List<User> users = await dbConn.query(query,User,{'username':parameters['username']});
+			if(users.length() != 0) {
+				print('user ${parameters['username']} already exists');
+				return {'ok':'no'};
+			}
+			
 			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
 			Map params = {
 				'username':parameters['username'],
@@ -139,16 +146,18 @@ class AuthService {
 				'bio':''
 			};
 			int result = await dbConn.execute(query, params);
-			print('inserted $params into users');
+			
+			if(result > 0) {
+				print('inserted $params into users');
 
-			// Just verified? Delete table entry.
-			String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-			await dbConn.execute(deleteQuery, SESSIONS[parameters['token']].email);
+				// Just verified? Delete table entry.
+				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
+				await dbConn.execute(deleteQuery, SESSIONS[parameters['token']].email);
 
-			if(result != 0)
 				return {'ok':'yes'};
-			else
+			} else {
 				return {'ok':'no'};
+			}
 		}
 		catch(e) {
 			print('oops, an exception: $e');
@@ -157,8 +166,7 @@ class AuthService {
 	}
 
 	//creates an entry in the SESSIONS map and returns the username associated with the session
-	Future<String> createSession(String email) async
-	{
+	Future<String> createSession(String email) async {
 		String query = "SELECT * FROM users WHERE email = @email";
 		Map params = {'email':email};
 
