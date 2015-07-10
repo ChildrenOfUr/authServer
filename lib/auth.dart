@@ -139,7 +139,7 @@ class AuthService {
 				return {'ok':'no'};
 			}
 			
-			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
+			query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
 			Map params = {
 				'username':parameters['username'],
 				'email':SESSIONS[parameters['token']].email,
