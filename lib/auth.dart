@@ -66,28 +66,30 @@ class AuthService {
 	}
 
 	@app.Route('/verifyLink', responseType: "text/html")
-	Future verifyLink(@app.QueryParam() String email, @app.QueryParam() String token) async
-	{
-		if(AuthService.pendingVerifications[email] != null) {
-			String query = "SELECT * FROM email_verifications WHERE email = @email";
-			List<EmailVerification> results = await dbConn.query(query, EmailVerification, {'email':email});
-			if(results.length > 0) {
-				EmailVerification result = results[0];
-				if(result.token == token) {
-					Map serverdata = await getSession({'email':email});
-					Map response = {'result':'success', 'serverdata':serverdata};
-
-					AuthService.pendingVerifications[email].add(JSON.encode(response));
-
-					//set verified to true
-					query = "UPDATE email_verifications SET verified = true WHERE email = @email";
-					int setResult = await dbConn.execute(query, result);
-					if(setResult < 1)
-						return {'result':'There was a problem saving verifying the email'};
+	Future verifyLink(@app.QueryParam() String email, @app.QueryParam() String token) async	{
+		String query = "SELECT * FROM email_verifications WHERE email = @email";
+		List<EmailVerification> results = await dbConn.query(query, EmailVerification, {'email':email});
+		if(results.length > 0) {
+			EmailVerification result = results[0];
+			if(result.token == token) {
+				//set verified to true
+				query = "UPDATE email_verifications SET verified = true WHERE email = @email";
+				int setResult = await dbConn.execute(query, result);
+				if(setResult < 1) {
+					return errorOutput;
+				} else {
+					//if their client is currently open, log them in
+					if(AuthService.pendingVerifications[email] != null) {
+						Map serverdata = await getSession({'email':email});
+						Map response = {'result':'success', 'serverdata':serverdata};
+		
+						AuthService.pendingVerifications[email].add(JSON.encode(response));
+					}
 					return verifiedOutput;
 				}
 			}
 		}
+		
 		return errorOutput;
 	}
 
@@ -124,31 +126,40 @@ class AuthService {
 	Future<Map> setUsername(@app.Body(app.JSON) Map parameters) async
 	{
 		try {
-			print('setusername with: $parameters');
+			print('setusername called with: $parameters');
 
 			if(!SESSIONS.containsKey(parameters['token'])) {
 				return {'ok':'no'};
 			}
 
 			print('got from token this email: ${SESSIONS[parameters['token']].email}');
-
-			String query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
+			//check for existing username
+			String query = "SELECT username FROM users WHERE username = @username";
+			List<User> users = await dbConn.query(query,User,{'username':parameters['username']});
+			if(users.length() != 0) {
+				print('user ${parameters['username']} already exists');
+				return {'ok':'no'};
+			}
+			
+			query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
 			Map params = {
 				'username':parameters['username'],
 				'email':SESSIONS[parameters['token']].email,
 				'bio':''
 			};
 			int result = await dbConn.execute(query, params);
-			print('inserted $params into users');
+			
+			if(result > 0) {
+				print('inserted $params into users');
 
-			// Just verified? Delete table entry.
-			String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-			await dbConn.execute(deleteQuery, SESSIONS[parameters['token']].email);
+				// Just verified? Delete table entry.
+				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
+				await dbConn.execute(deleteQuery, SESSIONS[parameters['token']].email);
 
-			if(result != 0)
 				return {'ok':'yes'};
-			else
+			} else {
 				return {'ok':'no'};
+			}
 		}
 		catch(e) {
 			print('oops, an exception: $e');
@@ -157,8 +168,7 @@ class AuthService {
 	}
 
 	//creates an entry in the SESSIONS map and returns the username associated with the session
-	Future<String> createSession(String email) async
-	{
+	Future<String> createSession(String email) async {
 		String query = "SELECT * FROM users WHERE email = @email";
 		Map params = {'email':email};
 
