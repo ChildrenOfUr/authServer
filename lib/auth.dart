@@ -136,7 +136,7 @@ class AuthService {
 			//check for existing username
 			String query = "SELECT username FROM users WHERE username = @username";
 			List<User> users = await dbConn.query(query,User,{'username':parameters['username']});
-			if(users.length() != 0) {
+			if(users.length != 0) {
 				print('user ${parameters['username']} already exists');
 				return {'ok':'no'};
 			}
