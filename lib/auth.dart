@@ -93,6 +93,21 @@ class AuthService {
 		return errorOutput;
 	}
 
+	@app.Route('/isEmailVerified', methods: const[app.POST])
+	Future<Map> isEmailVerified(@app.Body(app.JSON) Map parameters) async {
+		String email = parameters['email'];
+		Map response = {'result':'not verified'};
+
+		String query = "SELECT * FROM email_verifications WHERE email = @email AND verified = true";
+		List<EmailVerification> results = await dbConn.query(query,EmailVerification,{'email':email});
+		if(results.length > 0) {
+			Map serverdata = await getSession({'email':email});
+			response = {'result':'success', 'serverdata':serverdata};
+		}
+
+		return response;
+	}
+
 	@app.Route('/getSession', methods: const[app.POST])
 	Future<Map> getSession(@app.Body(app.JSON) Map parameters) async
 	{
@@ -129,16 +144,25 @@ class AuthService {
 			print('setusername called with: $parameters');
 
 			if(!SESSIONS.containsKey(parameters['token'])) {
-				return {'ok':'no'};
+				return {'ok':'no','reason':'could not get active session for user'};
 			}
 
-			print('got from token this email: ${SESSIONS[parameters['token']].email}');
+			String email = SESSIONS[parameters['token']].email;
+			print('got from token this email: $email');
 			//check for existing username
 			String query = "SELECT username FROM users WHERE username = @username";
 			List<User> users = await dbConn.query(query,User,{'username':parameters['username']});
 			if(users.length != 0) {
 				print('user ${parameters['username']} already exists');
-				return {'ok':'no'};
+				return {'ok':'no', 'reason':'user ${parameters['username']} already exists'};
+			}
+
+			//check for existing email
+			String query = "SELECT email FROM users WHERE email = @email";
+			List<User> users = await dbConn.query(query,User,{'email':email});
+			if(users.length != 0) {
+				print('email $email already exists');
+				return {'ok':'no', 'reason':'email $email already exists'};
 			}
 			
 			query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
@@ -158,12 +182,12 @@ class AuthService {
 
 				return {'ok':'yes'};
 			} else {
-				return {'ok':'no'};
+				return {'ok':'no','reason':'could not insert user into the database'};
 			}
 		}
 		catch(e) {
 			print('oops, an exception: $e');
-			return {'ok':'no'};
+			return {'ok':'no','reason':'oops, an exception'};
 		}
 	}
 
@@ -177,10 +201,11 @@ class AuthService {
 		List<User> users = await dbConn.query(query, User, params);
 		Session session;
 
-		if(users.length > 0)
+		if(users.length > 0) {
 			session = new Session(sessionKey, users[0].username, email);
-		else
+		} else {
 			session = new Session(sessionKey, '', email);
+		}
 
 		SESSIONS[sessionKey] = session;
 		return sessionKey;
