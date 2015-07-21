@@ -91,6 +91,21 @@ class AuthService {
 		return errorOutput;
 	}
 
+	@app.Route('/isEmailVerified', methods: const[app.POST])
+	Future<Map> isEmailVerified(@app.Body(app.JSON) Map parameters) async {
+		String email = parameters['email'];
+		Map response = {'result':'not verified'};
+
+		String query = "SELECT * FROM email_verifications WHERE email = @email AND verified = true";
+		List<EmailVerification> results = await dbConn.query(query,EmailVerification,{'email':email});
+		if(results.length > 0) {
+			Map serverdata = await getSession({'email':email});
+			response = {'result':'success', 'serverdata':serverdata};
+		}
+
+		return response;
+	}
+
 	@app.Route('/getSession', methods: const[app.POST])
 	Future<Map> getSession(@app.Body(app.JSON) Map parameters) async
 	{
