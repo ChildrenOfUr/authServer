@@ -91,21 +91,6 @@ class AuthService {
 		return errorOutput;
 	}
 
-	@app.Route('/isEmailVerified', methods: const[app.POST])
-	Future<Map> isEmailVerified(@app.Body(app.JSON) Map parameters) async {
-		String email = parameters['email'];
-		Map response = {'result':'not verified'};
-
-		String query = "SELECT * FROM email_verifications WHERE email = @email AND verified = true";
-		List<EmailVerification> results = await dbConn.query(query,EmailVerification,{'email':email});
-		if(results.length > 0) {
-			Map serverdata = await getSession({'email':email});
-			response = {'result':'success', 'serverdata':serverdata};
-		}
-
-		return response;
-	}
-
 	@app.Route('/getSession', methods: const[app.POST])
 	Future<Map> getSession(@app.Body(app.JSON) Map parameters) async
 	{
@@ -145,7 +130,8 @@ class AuthService {
 				return {'ok':'no'};
 			}
 
-			print('got from token this email: ${SESSIONS[parameters['token']].email}');
+			String email = SESSIONS[parameters['token']].email;
+			print('got from token this email: $email');
 			//check for existing username
 			String query = "SELECT username FROM users WHERE username = @username";
 			List<User> users = await dbConn.query(query,User,{'username':parameters['username']});
@@ -165,7 +151,7 @@ class AuthService {
 			query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
 			Map params = {
 				'username':parameters['username'],
-				'email':SESSIONS[parameters['token']].email,
+				'email':email,
 				'bio':''
 			};
 			int result = await dbConn.execute(query, params);
@@ -175,7 +161,7 @@ class AuthService {
 
 				// Just verified? Delete table entry.
 				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-				await dbConn.execute(deleteQuery, SESSIONS[parameters['token']].email);
+				await dbConn.execute(deleteQuery, email);
 
 				return {'ok':'yes'};
 			} else {
