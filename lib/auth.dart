@@ -154,7 +154,7 @@ class AuthService {
 
 				// Just verified? Delete table entry.
 				String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
-				await dbConn.execute(deleteQuery, SESSIONS[parameters['token']].email);
+				await dbConn.execute(deleteQuery, {'email':SESSIONS[parameters['token']].email});
 
 				return {'ok':'yes'};
 			} else {
