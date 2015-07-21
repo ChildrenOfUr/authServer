@@ -136,7 +136,15 @@ class AuthService {
 			List<User> users = await dbConn.query(query,User,{'username':parameters['username']});
 			if(users.length != 0) {
 				print('user ${parameters['username']} already exists');
-				return {'ok':'no'};
+				return {'ok':'no', 'reason':'user ${parameters['username']} already exists'};
+			}
+
+			//check for existing email
+			query = "SELECT email FROM users WHERE email = @email";
+			List<User> users = await dbConn.query(query,User,{'email':email});
+			if(users.length != 0) {
+				print('email $email already exists');
+				return {'ok':'no', 'reason':'email $email already exists'};
 			}
 			
 			query = "INSERT INTO users (username,email,bio) VALUES(@username,@email,@bio)";
