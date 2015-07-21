@@ -158,7 +158,7 @@ class AuthService {
 			}
 
 			//check for existing email
-			String query = "SELECT email FROM users WHERE email = @email";
+			query = "SELECT email FROM users WHERE email = @email";
 			List<User> users = await dbConn.query(query,User,{'email':email});
 			if(users.length != 0) {
 				print('email $email already exists');
