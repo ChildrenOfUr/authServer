@@ -12,7 +12,7 @@ class VerifyHandler {
 				}
 			} catch(e) {
 				if(e is! WebSocketException) {
-					logMessage("error: $error");
+					logMessage("error: $e");
 				}
 			}
 		});
