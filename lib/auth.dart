@@ -100,7 +100,6 @@ class AuthService {
 		if(m.length > 0)
 			playerMetabolics = m[0];
 		Map serverdata = {'slack-webhook':couWebhook,
-			'slack-bug-webhook':bugWebhook,
 			'sc-token':scToken,
 			'sessionToken':sessionKey,
 			'playerName':SESSIONS[sessionKey].username,
