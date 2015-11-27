@@ -2,20 +2,19 @@ library auth_test;
 
 import 'dart:convert';
 import 'package:unittest/unittest.dart';
-import 'package:redstone/server.dart' as app;
-import 'package:redstone/mocks.dart';
+import 'package:redstone/redstone.dart' as app;
 
 main() {
 
   //load handlers in 'authServer' library
-  setUp(() => app.setUp([#authServer]));
+  setUp(() => app.redstoneSetUp([#authServer]));
 
   //remove all loaded handlers
-  tearDown(() => app.tearDown());
+  tearDown(() => app.redstoneTearDown());
 
   test("POST verifyEmail error", () {
     //create a mock request
-    var req = new MockRequest("/auth/verifyEmail",
+    var req = new app.MockRequest("/auth/verifyEmail",
         method: app.POST,
         bodyType: app.JSON, body: {});
     //dispatch the request
@@ -29,7 +28,7 @@ main() {
 
   test("POST logout session", () {
     //create a mock request
-    var req = new MockRequest("/auth/logout",
+    var req = new app.MockRequest("/auth/logout",
         method: app.POST,
         bodyType: app.JSON, body: {
       "session": "Test token"

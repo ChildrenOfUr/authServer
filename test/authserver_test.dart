@@ -2,22 +2,21 @@ library authServer_test;
 
 import 'dart:convert';
 import 'package:unittest/unittest.dart';
-import 'package:redstone/server.dart' as app;
-import 'package:redstone/mocks.dart';
+import 'package:redstone/redstone.dart' as app;
 
 import '../bin/authserver.dart';
 
 main() {
 
   //load handlers in 'authServer' library
-  setUp(() => app.setUp([#authServer]));
+  setUp(() => app.redstoneSetUp([#authServer]));
 
   //remove all loaded handlers
-  tearDown(() => app.tearDown());
+  tearDown(() => app.redstoneTearDown());
 
   test("GET server status", () {
     //create a mock request
-    var req = new MockRequest("/serverStatus");
+    var req = new app.MockRequest("/serverStatus");
     //dispatch the request
     return app.dispatch(req).then((resp) {
       //verify the response

@@ -2,8 +2,7 @@ library data_test;
 
 import 'dart:convert';
 import 'package:unittest/unittest.dart';
-import 'package:redstone/server.dart' as app;
-import 'package:redstone/mocks.dart';
+import 'package:redstone/redstone.dart' as app;
 import "package:authServer/session.dart";
 
 import "../bin/authserver.dart" as server;
@@ -12,14 +11,14 @@ import "../bin/authserver.dart" as server;
 main() {
 
   //load handlers in 'authServer' library
-  setUp(() => app.setUp([#authServer]));
+  setUp(() => app.redstoneSetUp([#authServer]));
 
   //remove all loaded handlers
-  tearDown(() => app.tearDown());
+  tearDown(() => app.redstoneTearDown());
 
   test("POST street, not logged in", () {
     //create a mock request
-    var req = new MockRequest("/data/street",
+    var req = new app.MockRequest("/data/street",
         method: app.POST,
         bodyType: app.JSON, body: {
       "sessionToken": "value1",
@@ -41,7 +40,7 @@ main() {
     server.SESSIONS[sessionKey] = session;
 
     //create a mock request
-    var req = new MockRequest("/data/street",
+    var req = new app.MockRequest("/data/street",
         method: app.POST,
         bodyType: app.JSON, body: {
       "sessionToken": "$sessionKey",
