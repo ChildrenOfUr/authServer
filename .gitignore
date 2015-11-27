@@ -6,3 +6,5 @@ pubspec.lock
 build
 *.swp
 .idea/
+.packages
+ssl/

@@ -6,11 +6,10 @@ import 'dart:convert';
 
 import "package:args/args.dart";
 import "package:http/http.dart" as http;
-import "package:redstone/server.dart" as app;
+import "package:redstone/redstone.dart" as app;
 import 'package:redstone_mapper/plugin.dart';
 import 'package:redstone_mapper/mapper.dart';
 import 'package:redstone_mapper_pg/manager.dart';
-import 'package:shelf/shelf.dart' as shelf;
 import 'package:uuid/uuid.dart';
 import "package:authServer/session.dart";
 import 'package:mailer/mailer.dart';
@@ -69,9 +68,12 @@ Future main(List<String> arguments) async {
 
 	if(loadCert) {
 		try {
-			SecureSocket.initialize(database: "sql:./certdb", password: certdbPassword);
+			String certPath = 'ssl/letsencrypt/server.childrenofur.com';
+			SecurityContext context = new SecurityContext()
+				..useCertificateChain('$certPath/fullchain.pem')
+				..usePrivateKey('$certPath/privkey.pem');
 			app.setupConsoleLog();
-			app.start(port:port, autoCompress:true, secureOptions: {#certificateName: certName});
+			app.start(port:port, autoCompress:true, secureOptions: {#context: context});
 		} catch(error) {
 			print("Unable to start server with signed certificate: $error");
 		}
@@ -94,16 +96,11 @@ Future main(List<String> arguments) async {
 
 //add a CORS header to every request
 @app.Interceptor(r'/.*')
-crossOriginInterceptor() {
-	if(app.request.method == "OPTIONS") {
-		//overwrite the current response and interrupt the chain.
-		app.response = new shelf.Response.ok(null, headers: _createCorsHeader());
-		app.chain.interrupt();
+handleCORS() async {
+	if (app.request.method != "OPTIONS") {
+		await app.chain.next();
 	}
-	else {
-		//process the chain and wrap the response
-		app.chain.next(() => app.response.change(headers: _createCorsHeader()));
-	}
+	return app.response.change(headers: {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"});
 }
 
 PostgreSql get dbConn => app.request.attributes.dbConn;
@@ -124,5 +121,3 @@ Map getServerStatus() {
 void logMessage(String message) {
 	print("(${new DateTime.now().toString()}) $message");
 }
-
-_createCorsHeader() => {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"};

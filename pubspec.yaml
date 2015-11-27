@@ -4,7 +4,7 @@ description: A server to handle logins for the CoU Client
 author: CoU Development Team
 
 dependencies:
-  redstone: any
+  redstone: "^0.6.1"
   redstone_mapper_pg: any
   http: any
   uuid: any
