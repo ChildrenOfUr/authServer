@@ -1,8 +1,7 @@
 library session;
 
-class Session
-{
-	String sessionKey, username, email;
+class Session {
+    String sessionKey, username, email;
 
-	Session(this.sessionKey,this.username, this.email);
+    Session(this.sessionKey, this.username, this.email);
 }
