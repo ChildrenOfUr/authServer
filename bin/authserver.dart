@@ -72,6 +72,7 @@ Future main(List<String> arguments) async {
 
     if (loadCert) {
         try {
+            String certPath = 'ssl/letsencrypt/server.childrenofur.com';
             SecurityContext context = new SecurityContext()
                 ..useCertificateChain('$certPath/fullchain.pem')
                 ..usePrivateKey('$certPath/privkey.pem');
