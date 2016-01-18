@@ -11,7 +11,7 @@ class DataService {
             String tsid = parameters['street'];
             if (tsid.startsWith('L'))
                 tsid = tsid.replaceFirst('L', 'G');
-            String url = "http://RobertMcDermot.github.io/CAT422-glitch-location-viewer/locations/$tsid.json";
+            String url = "https://raw.githubusercontent.com/ChildrenOfUr/CAT422-glitch-location-viewer/master/locations/$tsid.json";
             http.Response response = await http.get(url);
 
             try {
