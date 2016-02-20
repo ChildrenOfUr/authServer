@@ -89,7 +89,7 @@ Future main(List<String> arguments) async {
 
     VerifyHandler.init();
 
-    String currentDir = path.dirname(Platform.script.path);
+    String currentDir = path.dirname(Platform.script.toFilePath());
     verifiedOutputFile = new File("$currentDir/output_verified.html");
     errorOutputFile = new File("$currentDir/output_error.html");
 
