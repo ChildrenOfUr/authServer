@@ -15,9 +15,7 @@ import 'package:redstone_mapper/plugin.dart';
 import 'package:redstone_mapper_pg/manager.dart';
 import 'package:uuid/uuid.dart';
 
-import '../API_KEYS.dart';
-
-export '../API_KEYS.dart';
+import 'package:authServer/keychain.dart';
 
 part '../lib/auth.dart';
 part '../lib/data.dart';
@@ -29,7 +27,7 @@ part '../lib/verify_handler.dart';
 Map<String, Session> SESSIONS = {};
 Uuid uuid = new Uuid();
 ArgResults argResults;
-bool loadCert = true;
+bool loadCert = false;
 PostgreSqlManager dbManager;
 
 File verifiedOutputFile, errorOutputFile;
@@ -38,12 +36,15 @@ String verifiedOutput, errorOutput;
 Future main(List<String> arguments) async {
 	//setup command line argument parsing
 	final parser = new ArgParser()
-	//use --no-load-cert to ignore certification loading
-		..addFlag("load-cert", defaultsTo: true, help: "Enables certificate loading for certificate")
+	//use --load-cert to trigger certification loading
+		..addFlag("load-cert", defaultsTo: false, help: "Enables certificate loading for certificate")
 		..addOption("port", defaultsTo: "8383", help: "Port to run the server on");
 
 	argResults = parser.parse(arguments);
 	loadCert = argResults['load-cert'];
+
+	// Load our API_KEYS file into memory.
+	await KEYCHAIN.load();
 
 	int port;
 	try {
@@ -64,14 +65,14 @@ Future main(List<String> arguments) async {
 		}
 	}
 
-	dbManager = new PostgreSqlManager(databaseUri, min: 1, max: 9);
+	dbManager = new PostgreSqlManager(KEYCHAIN.keys['databaseUri'], min: 1, max: 9);
 	app.addPlugin(getMapperPlugin(dbManager));
 
 	if (loadCert) {
 		try {
 			SecurityContext context = new SecurityContext()
-				..useCertificateChain('$certPath/fullchain.pem')
-				..usePrivateKey('$certPath/privkey.pem');
+				..useCertificateChain(KEYCHAIN.keys['certPath'] + '/fullchain.pem')
+				..usePrivateKey(KEYCHAIN.keys['certPath'] + '/privkey.pem');
 			app.setupConsoleLog();
 			app.start(port: port, autoCompress: true, secureOptions: {#context: context});
 		} catch (error) {

@@ -14,7 +14,7 @@ class AuthService {
         //create a unique link to click in the email
         String token = uuid.v1();
         String email = Uri.encodeQueryComponent(parameters['email']);
-        String link = 'https://$serverUrl:8383/auth/verifyLink?token=$token&email=$email';
+        String link = 'https://' + KEYCHAIN.keys["serverUrl"] + ':8383/auth/verifyLink?token=$token&email=$email';
 
         //check to see if we've already tried to verify.
         String query = "SELECT * FROM email_verifications WHERE email = @email";
@@ -36,10 +36,10 @@ class AuthService {
 
         //set our email server configs
         SmtpOptions options = new SmtpOptions()
-            ..hostName = emailHostName
-            ..port = emailPort
-            ..username = emailUsername
-            ..password = emailPassword
+            ..hostName =  KEYCHAIN.keys['emailHostName']
+            ..port =      KEYCHAIN.keys['emailPort']
+            ..username =  KEYCHAIN.keys['emailUsername']
+            ..password =  KEYCHAIN.keys['emailPassword']
             ..requiresAuthentication = true;
 
         SmtpTransport transport = new SmtpTransport(options);
@@ -113,9 +113,9 @@ class AuthService {
         Metabolics playerMetabolics = new Metabolics();
         if (m.length > 0)
             playerMetabolics = m[0];
-        Map serverdata = {'slack-webhook':couWebhook,
-            'slack-bug-webhook':bugWebhook,
-            'sc-token':scToken,
+        Map serverdata = {'slack-webhook':KEYCHAIN.keys['couWebhook'],
+            'slack-bug-webhook':KEYCHAIN.keys['bugWebhook'],
+            'sc-token':KEYCHAIN.keys['scToken'],
             'sessionToken':sessionKey,
             'playerName':SESSIONS[sessionKey].username,
             'playerEmail':email,

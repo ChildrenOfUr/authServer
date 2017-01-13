@@ -1,6 +1,7 @@
 .pub
 certdb/
 API_KEYS.dart
+API_KEYS.json
 packages
 pubspec.lock
 build
