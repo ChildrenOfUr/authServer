@@ -171,6 +171,14 @@ class AuthService {
             if (result > 0) {
                 print('inserted $params into users');
 
+                //create an api key for them
+                String apiKey = uuid.v1();
+                String apiQuery = "INSERT INTO api_access (api_token, user_id)"
+                                  " VALUES (@apiKey, (SELECT id FROM users"
+                                  " WHERE username = @username))";
+                await dbConn.execute(apiQuery, {'username': parameters['username'],
+                                                'apiKey': apiKey});
+
                 // Just verified? Delete table entry.
                 String deleteQuery = "DELETE FROM email_verifications WHERE email = @email";
                 await dbConn.execute(deleteQuery, {'email':email});
