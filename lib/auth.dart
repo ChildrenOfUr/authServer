@@ -119,7 +119,7 @@ class AuthService {
             'sessionToken':sessionKey,
             'playerName':SESSIONS[sessionKey].username,
             'playerEmail':email,
-            'playerStreet':playerMetabolics.current_street,
+            'playerStreet':playerMetabolics.currentStreet,
             'metabolics':JSON.encode(encode(playerMetabolics))};
 
         return serverdata;
