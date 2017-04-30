@@ -20,11 +20,9 @@ import '../API_KEYS.dart';
 export '../API_KEYS.dart';
 
 part '../lib/auth.dart';
-part '../lib/data.dart';
 part '../lib/metabolics.dart';
 part '../lib/user.dart';
 part '../lib/verify_handler.dart';
-
 
 Map<String, Session> SESSIONS = {};
 Uuid uuid = new Uuid();
